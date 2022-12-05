@@ -5,10 +5,12 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "tw-build-watch": "npx tailwindcss -i ./src/assets/input.css -o ./src/assets/main.css --watch"
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "tailwindcss": "^3.2.4",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"
