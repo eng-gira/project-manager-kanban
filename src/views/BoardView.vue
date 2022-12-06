@@ -31,7 +31,9 @@ import defaultBoard from '@/default-board.js'
 let board = ref(null)
 
 /**
- * @todo use .value with board and see what changes in the console.
+ * @todo use .value with board and see what changes in the console. If nothing, I think the only thing that changes is 
+ *  that board = defaultBoard makes board no longer a ref but a defaultBoard. To keep it a ref, I think you need to use 
+ *  board.value = defaultBoard
  */
 onBeforeMount(() => {
     board = defaultBoard
