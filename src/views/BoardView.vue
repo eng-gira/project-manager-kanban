@@ -3,7 +3,8 @@
     <div class="p-4 bg-teal-500 h-screen overflow-auto">
         <div v-if="board" class="flex items-start">
             <!-- Column Class Styles -->
-            <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[350px]" v-for="column in board.columns" :key="column.name">
+            <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[350px]" v-for="column in board.columns" 
+                :key="column.name">
                 <div class="flex items-center mb-2 font-bold">
                     {{ column.name }}
                 </div>
