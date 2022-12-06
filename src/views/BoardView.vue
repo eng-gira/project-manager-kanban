@@ -30,6 +30,9 @@ import defaultBoard from '@/default-board.js'
 
 let board = ref(null)
 
+/**
+ * @todo use .value with board and see what changes in the console.
+ */
 onBeforeMount(() => {
     board = defaultBoard
 
