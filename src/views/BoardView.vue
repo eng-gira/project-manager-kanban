@@ -11,35 +11,79 @@
                 <div class="list-reset">
                     <!-- Task Class Styles -->
                     <div 
-                        class="flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline cursor-pointer"
+                        class="flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline"
                         v-for="task in column.tasks" :key="task.id"
+                        @click="openTask(task.id)"
                         >
-                        {{ task.name }}
+                        <!-- Idk if flex-no-shrink would work or I must use flex-shrink-0 -->
+                        <span class="w-full font-bold flex-no-shrink"> 
+                            {{ task.name }}
+                        </span>
+                        <p 
+                            v-if="task.description"
+                            class="w-full flex-no-shrink text-sm mt-1">
+                            {{ task.description }}
+                        </p>
                     </div>
+
+                    <input
+                        type="text"
+                        class="p-2 block w-full bg-transparent"
+                        placeholder="Add a task..."
+                        @keyup.enter="addTask($event, column.tasks)"
+                    />
                 </div>
             </div>
         </div>
-    
-
+        
+    </div>
+    <!-- Task Modal -->
+    <!-- class="bg-gray-300 absolute pin" -->
+    <div 
+        class="bg-transparent absolute inset-0 semi-transparent"
+        v-if="isTaskOpen"
+        @click.self="closeTask"
+    >
+        <router-view />
     </div>
 
 </template>
 <script setup>
-import { onBeforeMount, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import defaultBoard from '@/default-board.js'
 
 let board = ref(null)
+const route = useRoute()
+const router = useRouter()
 
-/**
- * @todo use .value with board and see what changes in the console. If nothing, I think the only thing that changes is 
- *  that board = defaultBoard makes board no longer a ref but a defaultBoard. To keep it a ref, I think you need to use 
- *  board.value = defaultBoard
- */
 onBeforeMount(() => {
-    board = defaultBoard
+    board.value = defaultBoard
 
-    console.log('board', board)
-    console.log('columns', board.columns)
-    console.log('columns[0].name', board.columns[0].name)
+    console.log('board', board.value)
+    console.log('columns', board.value.columns)
+    console.log('columns[0].name', board.value.columns[0].name)
 })
+
+let isTaskOpen = computed(() => {
+    return route.name === 'TaskModal'
+})
+
+const openTask = (id) => {
+    router.push({ name: 'TaskModal', params: { id: id } })
+}
+const closeTask = () => {
+    router.push({ name: 'BoardView' })
+}
+const addTask = (event, tasks) => {
+    console.log(event.target.value)
+    event.target.value = ''
+}
+
 </script> 
+
+<style scoped>
+.semi-transparent {
+    background-color: rgba(0,0,0,0.5);
+}
+</style>
