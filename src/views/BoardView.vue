@@ -3,17 +3,27 @@
     <div class="p-4 bg-teal-500 h-screen overflow-auto">
         <div v-if="board" class="flex items-start">
             <!-- Column Class Styles -->
-            <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[350px]" v-for="column in board.columns" 
-                :key="column.name">
+            <div
+                class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[350px]"
+                v-for="column in board.columns"
+                :key="column.name"
+      
+                @drop="placeTask(column.id, $event)"
+                @dragover.prevent
+                @dragenter.prevent
+                >
                 <div class="flex items-center mb-2 font-bold">
                     {{ column.name }}
                 </div>
                 <div class="list-reset">
                     <!-- Task Class Styles -->
+                    <!-- @Note you must specify whether draggable = "true" or "false", and not write draggable -->
                     <div 
                         class="flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline"
                         v-for="task in column.tasks" :key="task.id"
                         @click="openTask(task.id)"
+                        draggable="true"
+                        @dragstart="pickupTask(task.id, column.id, $event)"
                         >
                         <!-- Idk if flex-no-shrink would work or I must use flex-shrink-0 -->
                         <span class="w-full font-bold flex-no-shrink"> 
@@ -38,7 +48,6 @@
         
     </div>
     <!-- Task Modal -->
-    <!-- class="bg-gray-300 absolute pin" -->
     <div 
         class="bg-transparent absolute inset-0 semi-transparent"
         v-if="isTaskOpen"
@@ -80,6 +89,39 @@ const addTask = (event, tasks) => {
     event.target.value = ''
 }
 
+/**
+ * Drag API (Start)
+ */
+const pickupTask = (taskId, fromColOfId, event) => {
+    // fromColOfId, toColOfId, taskId
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.dropEffect = 'move'
+
+
+    event.dataTransfer.setData('task-id', taskId)
+    event.dataTransfer.setData('from-col-of-id', fromColOfId)
+}
+const placeTask = (toColOfId, event) => {
+    const fromColOfId = event.dataTransfer.getData('from-col-of-id')
+    if(toColOfId==fromColOfId)
+    {
+        console.log('Aborted: same col transfers')
+        return
+    }
+    
+    // // for testing
+    // board.value.columns[toColOfId - 1].tasks.push({name: 'dragged-task', id: -1})
+
+    console.log('Attempted to drag task of id', 
+        event.dataTransfer.getData('task-id'), 
+        'from col of id', 
+        fromColOfId,
+        'to col of id',
+        toColOfId)
+}
+/**
+ * Drag API (End)
+ */
 </script> 
 
 <style scoped>

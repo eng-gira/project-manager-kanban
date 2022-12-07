@@ -4,6 +4,7 @@ export default {
   name: 'workshop',
   columns: [
     {
+      id: 1,
       name: 'todo',
       tasks: [
         {
@@ -27,6 +28,7 @@ export default {
       ]
     },
     {
+      id: 2,
       name: 'in-progress',
       tasks: [
         {
@@ -38,6 +40,7 @@ export default {
       ]
     },
     {
+      id: 3,
       name: 'done',
       tasks: [
         {
