@@ -27,18 +27,18 @@ const props = defineProps({
 })
 
 let task = ref(null)
-onBeforeRouteUpdate(() => {
-    /**
-     * @todo request the task from the backend after finishing it
-     */
-    for(const column of defaultBoard.columns) {
-        for(const t of column.tasks) {
-            if(t.id == props.id) {
-                task.value = t
-            }
-        }
-    }
-})
+// onBeforeRouteUpdate(() => {
+//     /**
+//      * @todo request the task from the backend after finishing it
+//      */
+//     for(const column of defaultBoard.columns) {
+//         for(const t of column.tasks) {
+//             if(t.id == props.id) {
+//                 task.value = t
+//             }
+//         }
+//     }
+// })
 onBeforeMount(() => {
     /**
      * @todo request the task from the backend after finishing it
@@ -54,9 +54,11 @@ onBeforeMount(() => {
 
 const updateName = (taskId, event) => {
     console.log('task of id', taskId, 'should have name set to', event.target.value)
+    event.target.blur()
 }
 const updateDescription = (taskId, event) => {
     console.log('task of id', taskId, 'should have its description set to', event.target.value)
+    event.target.blur()
 }
 
 </script>

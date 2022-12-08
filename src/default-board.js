@@ -5,6 +5,7 @@ export default {
   columns: [
     {
       id: 1,
+      orderInBoard: 1,
       name: 'todo',
       tasks: [
         {
@@ -29,6 +30,7 @@ export default {
     },
     {
       id: 2,
+      orderInBoard: 2,
       name: 'in-progress',
       tasks: [
         {
@@ -41,6 +43,7 @@ export default {
     },
     {
       id: 3,
+      orderInBoard: 3,
       name: 'done',
       tasks: [
         {
