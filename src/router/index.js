@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import BoardView from '../views/BoardView.vue'
+import ProjectView from '../views/ProjectView.vue'
 import TaskModal from '../views/TaskModal.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'BoardView',
-    component: BoardView,
+    name: 'ProjectView',
+    component: ProjectView,
     children: [
       {
         path: 'task/:id',

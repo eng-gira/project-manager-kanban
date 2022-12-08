@@ -15,8 +15,9 @@
                 draggable="true"
                 @dragstart.self="pickupColumn(column.id, columnIndex, $event)"
                 >
-                <div class="flex items-center mb-2 font-bold">
-                    {{ column.name }}
+                <div class="flex items-center mb-2 font-bold justify-between">
+                    <div>{{ column.name }}</div>
+                    <button @click="openColDeletionConfirmationModal(column.id, columnIndex)">x</button>
                 </div>
                 <div class="list-reset">
                     <!-- Task Class Styles -->
@@ -78,6 +79,26 @@
         <router-view />
     </div>
 
+    <!-- Col Deletion Confirmation Modal -->
+    <div 
+        class="bg-transparent absolute inset-0 semi-transparent grid h-screen place-items-center"
+        v-if="confirmColDeletionModalVisible"
+        @click.self="closeColDeletionConfirmationModal"
+        >
+        <div class="bg-white w-[300px] flex flex-col p-3 rounded-lg space-y-4">
+            <h1 class="font-bold text-lg">Are you sure you want to delete this column and all of its tasks?</h1>
+            <div class="flex justify-between">
+                <button class="bg-red-300 hover:bg-red-500 p-1 rounded-lg text-white text-sm" @click="deleteCol">
+                    Confirm
+                </button>
+                <button
+                    class="bg-gray-300 hover:bg-gray-500 p-1 rounded-lg text-white text-sm"
+                    @click="closeColDeletionConfirmationModal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
 </template>
 <script setup>
 import { computed, onBeforeMount, ref } from 'vue'
@@ -104,7 +125,7 @@ const openTask = (id) => {
     router.push({ name: 'TaskModal', params: { id: id } })
 }
 const closeTask = () => {
-    router.push({ name: 'BoardView' })
+    router.push({ name: 'ProjectView' })
 }
 const addTask = (event, columnId, columnIndex) => {
     // Update the UI
@@ -227,6 +248,33 @@ const addColumn = (boardId) => {
 
     // Send to the backend
     // ...
+}
+
+let confirmColDeletionModalVisible = ref(false)
+let columnIndexWhoseDeletionBeingConfirmed = ref(-1)
+let IdOfColumnWhoseDeletionBeingConfirmed = ref(-1)
+
+const openColDeletionConfirmationModal = (colId, colIndex) => {
+    confirmColDeletionModalVisible.value = true
+    columnIndexWhoseDeletionBeingConfirmed.value = colIndex
+    IdOfColumnWhoseDeletionBeingConfirmed.value = colId
+}
+const closeColDeletionConfirmationModal = () => {
+    confirmColDeletionModalVisible.value = false
+    columnIndexWhoseDeletionBeingConfirmed.value = -1
+}
+const deleteCol = () => {
+    const colId = IdOfColumnWhoseDeletionBeingConfirmed.value
+    const colIndex = columnIndexWhoseDeletionBeingConfirmed.value
+
+    if(colIndex == -1 || colId == -1) return false
+
+    // Update the UI
+    board.value.columns.splice(colIndex, 1)[0]
+
+    // Send to the backend
+    // ...
+    closeColDeletionConfirmationModal()
 }
 
 </script> 
