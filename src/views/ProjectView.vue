@@ -16,8 +16,20 @@
                 @dragstart.self="pickupColumn(column.id, columnIndex, $event)"
                 >
                 <div class="flex items-center mb-2 font-bold justify-between">
-                    <div>{{ column.name }}</div>
-                    <button @click="openColDeletionConfirmationModal(column.id, columnIndex)">x</button>
+                    <input
+                        v-if="editingColName===true && editingColOfId == column.id"
+                        type="text"
+                        :value="column.name"
+                        class="p-2 mr-2 flex-grow bg-transparent border border-black rounded-lg h-[28px]"
+                        @change="updateColName(column.id, columnIndex, $event)"
+                        />
+                    <h1 v-else>
+                        {{ column.name}}
+                    </h1>
+                    <div class="">
+                        <button class="mr-2" @click="enableEditingColName(column.id)">Edit</button>
+                        <button @click="openColDeletionConfirmationModal(column.id, columnIndex)">x</button>
+                    </div>
                 </div>
                 <div class="list-reset">
                     <!-- Task Class Styles -->
@@ -72,7 +84,7 @@
     </div>
     <!-- Task Modal -->
     <div 
-        class="bg-transparent absolute inset-0 semi-transparent"
+        class="bg-transparent absolute inset-0 semi-transparent overflow-y-auto"
         v-if="isTaskOpen"
         @click.self="closeTask"
     >
@@ -87,12 +99,12 @@
         >
         <div class="bg-white w-[300px] flex flex-col p-3 rounded-lg space-y-4">
             <h1 class="font-bold text-lg">Are you sure you want to delete this column and all of its tasks?</h1>
-            <div class="flex justify-between">
-                <button class="bg-red-300 hover:bg-red-500 p-1 rounded-lg text-white text-sm" @click="deleteCol">
+            <div class="flex justify-around">
+                <button class="bg-red-300 hover:bg-red-500 py-1 px-2 rounded-lg text-white text-sm" @click="deleteCol">
                     Confirm
                 </button>
                 <button
-                    class="bg-gray-300 hover:bg-gray-500 p-1 rounded-lg text-white text-sm"
+                    class="bg-gray-300 hover:bg-gray-500 py-1 px-2 rounded-lg text-white text-sm"
                     @click="closeColDeletionConfirmationModal">
                     Cancel
                 </button>
@@ -120,7 +132,6 @@ onBeforeMount(() => {
 let isTaskOpen = computed(() => {
     return route.name === 'TaskModal'
 })
-
 const openTask = (id) => {
     router.push({ name: 'TaskModal', params: { id: id } })
 }
@@ -274,9 +285,25 @@ const deleteCol = () => {
 
     // Send to the backend
     // ...
+
     closeColDeletionConfirmationModal()
 }
 
+let editingColName = ref(false)
+let editingColOfId = ref(-1)
+const enableEditingColName = (colId) => {
+    editingColName.value = true
+    editingColOfId.value = colId
+}
+const updateColName = (colId, colIndex, event) => {
+    // Update the UI
+    board.value.columns[colIndex].name = event.target.value
+    editingColName.value = false
+    editingColOfId.value = -1
+    
+    // Send to the backend
+    // ...
+}
 </script> 
 
 <style scoped>

@@ -4,6 +4,35 @@ import ProjectView from '../views/ProjectView.vue'
 import TaskModal from '../views/TaskModal.vue'
 
 const routes = [
+  // {
+  // // Auth Layout
+  //    path: 'auth',
+  //    name: 'AuthLayout,
+  //    children: [{
+  //      // Login
+  //      // Register
+  //    }]
+  // },
+  // {
+  // // App Layout
+  //   path: '/',
+  //   name: 'SidebarLayout',
+  //   component: SidebarLayout,
+  //   children: [{
+  //     path: '/:projectId',
+  //     name: 'ProjectView',
+  //     component: ProjectView,
+  //     children: [
+  //         {
+  //           path: 'task/:id',
+  //           name: 'TaskModal',
+  //           component: TaskModal,
+  //           props: true,
+  //         }
+  //     ]
+  //   },
+  //   ]
+  // },
   {
     path: '/',
     name: 'ProjectView',
