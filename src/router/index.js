@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import SidebarLayout from '../views/SidebarLayout.vue'
 import ProjectView from '../views/ProjectView.vue'
 import TaskModal from '../views/TaskModal.vue'
 
@@ -13,39 +14,40 @@ const routes = [
   //      // Register
   //    }]
   // },
-  // {
-  // // App Layout
-  //   path: '/',
-  //   name: 'SidebarLayout',
-  //   component: SidebarLayout,
-  //   children: [{
-  //     path: '/:projectId',
-  //     name: 'ProjectView',
-  //     component: ProjectView,
-  //     children: [
-  //         {
-  //           path: 'task/:id',
-  //           name: 'TaskModal',
-  //           component: TaskModal,
-  //           props: true,
-  //         }
-  //     ]
-  //   },
-  //   ]
-  // },
   {
+  // App Layout
     path: '/',
-    name: 'ProjectView',
-    component: ProjectView,
-    children: [
-      {
-        path: 'task/:id',
-        name: 'TaskModal',
-        component: TaskModal,
-        props: true,
-      }
+    name: 'SidebarLayout',
+    component: SidebarLayout,
+    children: [{
+      // path: '/:projectId',
+      path: '/temp-proj-view',
+      name: 'ProjectView',
+      component: ProjectView,
+      children: [
+          {
+            path: 'task/:id',
+            name: 'TaskModal',
+            component: TaskModal,
+            props: true,
+          }
+      ]
+    },
     ]
   },
+  // {
+  //   path: '/',
+  //   name: 'ProjectView',
+  //   component: ProjectView,
+  //   children: [
+  //     {
+  //       path: 'task/:id',
+  //       name: 'TaskModal',
+  //       component: TaskModal,
+  //       props: true,
+  //     }
+  //   ]
+  // },
   {
     path: '/about',
     name: 'about',

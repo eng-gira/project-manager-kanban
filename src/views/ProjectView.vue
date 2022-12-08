@@ -1,10 +1,10 @@
 <template>
     <!-- Board Class Styles -->
-    <div class="p-4 bg-teal-500 h-screen overflow-auto">
-        <div v-if="board" class="flex items-start">
+    <div class="p-4 bg-[#F5F5F5] h-screen w-screen overflow-auto">
+        <div v-if="board" class="flex items-start ml-3">
             <!-- Column Class Styles -->
             <div
-                class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[350px]"
+                class="p-3 mr-4 text-left shadow rounded bg-[#D9D9D9] min-w-[300px] w-[300px] flex flex-col"
                 v-for="(column, columnIndex) in board.columns"
                 :key="column.name"
       
@@ -15,27 +15,29 @@
                 draggable="true"
                 @dragstart.self="pickupColumn(column.id, columnIndex, $event)"
                 >
+
                 <div class="flex items-center mb-2 font-bold justify-between">
                     <input
                         v-if="editingColName===true && editingColOfId == column.id"
                         type="text"
                         :value="column.name"
-                        class="p-2 mr-2 flex-grow bg-transparent border border-black rounded-lg h-[28px]"
+                        class="p-2 mr-2 flex-grow bg-transparent border border-black rounded-md h-[28px]"
                         @change="updateColName(column.id, columnIndex, $event)"
+                        @keyup.esc="disableEditingColName(columnIndex, $event)"
                         />
                     <h1 v-else>
                         {{ column.name}}
                     </h1>
                     <div class="">
-                        <button class="mr-2" @click="enableEditingColName(column.id)">Edit</button>
-                        <button @click="openColDeletionConfirmationModal(column.id, columnIndex)">x</button>
+                        <button class="mr-2" @click="enableEditingColName(column.id)" :disabled="isModalOpen">E</button>
+                        <button @click="openColDeletionConfirmationModal(column.id, columnIndex)" :disabled="isModalOpen">x</button>
                     </div>
                 </div>
                 <div class="list-reset">
                     <!-- Task Class Styles -->
                     <!-- @Note you must specify whether draggable = "true" or "false", and not write draggable -->
                     <div 
-                        class="flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline"
+                        class="flex items-center w-full flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline cursor-pointer"
                         v-for="(task, taskIndex) in column.tasks" :key="task.id"
                         @click="openTask(task.id)"
                         draggable="true"
@@ -45,8 +47,7 @@
                         @dragover.prevent
                         @dragenter.prevent
                         >
-                        <!-- Idk if flex-no-shrink would work or I must use flex-shrink-0 -->
-                        <span class="w-full font-bold flex-no-shrink"> 
+                        <span class="w-full font-bold"> 
                             {{ task.name }}
                         </span>
                         <p 
@@ -56,27 +57,27 @@
                         </p>
                     </div>
 
-                    <!-- Disable field if a task modal is open -->
                     <input
                         type="text"
-                        class="p-2 block w-full bg-transparent"
+                        class="p-2 block w-full bg-transparent h-[28px]"
                         placeholder="Add a task..."
                         @keyup.enter="addTask($event, column.id, columnIndex)"
-                        :disabled="isTaskOpen"
+                        @keyup.esc="$event.target.value = ''"
+                        :disabled="isModalOpen"
                     />
                 </div>
             </div>
             
             <!-- Add Column -->
-            <!-- Disable field if a task modal is open -->
-            <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[350px] flex">
+            <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[300px] h-[45px] flex">
                 <input
                     type="text"
                     class="p-2 mr-2 flex-grow bg-transparent"
                     placeholder="Add a Column..."
                     v-model="columnName"
                     @keyup.enter="addColumn"
-                    :disabled="isTaskOpen"
+                    @keyup.esc="columnName = ''"
+                    :disabled="isModalOpen"
                 />
             </div>
         </div>
@@ -96,6 +97,7 @@
         class="bg-transparent absolute inset-0 semi-transparent grid h-screen place-items-center"
         v-if="confirmColDeletionModalVisible"
         @click.self="closeColDeletionConfirmationModal"
+        @focusout="closeColDeletionConfirmationModal"
         >
         <div class="bg-white w-[300px] flex flex-col p-3 rounded-lg space-y-4">
             <h1 class="font-bold text-lg">Are you sure you want to delete this column and all of its tasks?</h1>
@@ -129,16 +131,27 @@ onBeforeMount(() => {
     console.log('columns[0].name', board.value.columns[0].name)
 })
 
+
 let isTaskOpen = computed(() => {
     return route.name === 'TaskModal'
 })
+
+let isModalOpen = ref(false)
+
 const openTask = (id) => {
+    isModalOpen.value = true
     router.push({ name: 'TaskModal', params: { id: id } })
 }
 const closeTask = () => {
+    isModalOpen.value = false
     router.push({ name: 'ProjectView' })
 }
 const addTask = (event, columnId, columnIndex) => {
+    if(event.target.value.length < 1) 
+    {
+        return false
+    }
+
     // Update the UI
     board.value.columns[columnIndex].tasks.push({
         id: board.value.columns[columnIndex].tasks.length,
@@ -249,6 +262,8 @@ const placeColumn = (toColOfId, toColIndex, event) => {
 let columnName = ref('')
 
 const addColumn = (boardId) => {
+    if(columnName.value.length < 1) return false
+    
     // Update the UI
     board.value.columns.push({
         id: board.value.columns.length + 1,
@@ -269,10 +284,12 @@ const openColDeletionConfirmationModal = (colId, colIndex) => {
     confirmColDeletionModalVisible.value = true
     columnIndexWhoseDeletionBeingConfirmed.value = colIndex
     IdOfColumnWhoseDeletionBeingConfirmed.value = colId
+    isModalOpen.value = true
 }
 const closeColDeletionConfirmationModal = () => {
     confirmColDeletionModalVisible.value = false
     columnIndexWhoseDeletionBeingConfirmed.value = -1
+    isModalOpen.value = false
 }
 const deleteCol = () => {
     const colId = IdOfColumnWhoseDeletionBeingConfirmed.value
@@ -303,6 +320,11 @@ const updateColName = (colId, colIndex, event) => {
     
     // Send to the backend
     // ...
+}
+const disableEditingColName = (colIndex, event) => {
+    event.target.value = board.value.columns[colIndex].name
+    editingColName.value = false
+    editingColOfId.value = -1
 }
 </script> 
 

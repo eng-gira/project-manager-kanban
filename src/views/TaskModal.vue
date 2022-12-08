@@ -1,6 +1,6 @@
 <template>
-    <div class="flex bg-white pin mx-auto mt-3 py-4 text-left rounded max-w-[700px]">
-        <div class="flex flex-col flex-grow justify-between items-start px-4">
+    <div class="flex bg-white pin mx-auto mt-3 py-4 px-6 text-left rounded max-w-[700px]">
+        <div class="flex flex-col flex-grow justify-between items-start">
             
             <input
                 type="text"
