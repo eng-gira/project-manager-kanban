@@ -1,26 +1,4 @@
 export default {
-  users: [
-    {
-      id: 1,
-      name: 'user1',
-      emai: 'user1@pm.com'
-    },
-    {
-      id: 2,
-      name: 'user2',
-      emai: 'user2@pm.com'      
-    },
-    {
-      id: 3,
-      name: 'user3',
-      emai: 'user3@pm.com'      
-    },
-    {
-      id: 4,
-      name: 'user4',
-      emai: 'user4@pm.com'      
-    },
-  ],
   projects: [
     {
       id: 1, 
@@ -36,6 +14,26 @@ export default {
           id: 4,
           name: 'user4',
           emai: 'user4@pm.com'      
+        },        
+        {
+          id: 11,
+          name: 'user11',
+          emai: 'user11@pm.com'      
+        },        
+        {
+          id: 12,
+          name: 'user12',
+          emai: 'user12@pm.com'      
+        },        
+        {
+          id: 13,
+          name: 'user13',
+          emai: 'user13@pm.com'      
+        },        
+        {
+          id: 14,
+          name: 'user14',
+          emai: 'user14@pm.com'      
         },        
       ],
       columns: [

@@ -122,7 +122,7 @@
         </div>
         <!-- Team Modal -->
         <div 
-            class="bg-transparent absolute inset-0 semi-transparent grid h-screen place-items-center"
+            class="bg-transparent absolute inset-0 semi-transparent grid h-screen place-items-center overflow-y-auto"
             v-if="teamModalVisible"
             @click.self="closeTeamModal"
             >

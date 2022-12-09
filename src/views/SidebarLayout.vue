@@ -8,14 +8,34 @@
                 <router-link
                     v-for="(project, projectIndex) in projects"
                     :key="projectIndex"
-                    class="w-[220px] h-[45px] rounded-md flex flex-col justify-center mb-3"
+                    class="w-[220px] h-[45px] rounded-md flex flex-col justify-center items-start mb-3"
                     :class="project.id==selectedProjectId ? 
                         'bg-[#0C4689] text-white' :
                         'bg-[#F4F4F4] cursor-pointer hover:bg-[#0C4689] hover:text-white'"
                     :to="{name: 'ProjectView', params: { projectId: project.id }}"
                     >
-                    {{ project.name }}
+                    <h1 class="ml-3">{{ project.name }}</h1>
                 </router-link>
+
+                <div class="text-sm">
+                    <button
+                        v-if="!creatingProject"
+                        class="bg-[#F4F4F4] hover:underline w-[220px] h-[45px] rounded-md"
+                        @click="startCreatingProject"
+                        >
+                        New Project
+                    </button>
+                    <div v-else>
+                        <input
+                            type="text"
+                            placeholder="Project Name..."
+                            @keyup.enter="createProject($event)"
+                            @keyup.esc="closeProjectCreate"
+                            @focusout="closeProjectCreate"
+                            class="bg-[#F4F4F4] rounded-md p-2 w-[220px] h-[45px]"
+                            />
+                    </div>
+                </div>
             </div>
             <div class="text-xs flex flex-col mt-6 mb-6" v-if="archivedProjects.length <= 0">
                 <h1 class="font-bold uppercase">Archived Projects</h1>
@@ -61,6 +81,20 @@ let selectedProjectId = computed(() => {
 const logout = () => {
     localStorage.removeItem('auth')
     router.push({ name: 'RegisterView' })
+}
+
+let creatingProject = ref(false)
+const startCreatingProject = () => {
+    creatingProject.value = true
+}
+const closeProjectCreate = () => {
+    creatingProject.value = false
+}
+const createProject = (event) => {
+    if(event.target.value.length > 0) {
+        projects.push({ id: projects.length+1, name: event.target.value, columns: [] })
+    }
+    closeProjectCreate()
 }
 
 </script>
