@@ -22,15 +22,16 @@
         </div>
         
         <h1 class="">
-            Already have an account? <router-link class="underline" :to="{name: 'RegisterView'}">Register</router-link> instead.
+            Already have an account? <router-link class="underline" :to="{name: 'RegisterView', query: { to: this.$route.query.to ?? null }}">Register</router-link> instead.
         </h1>
     </div>
 </template>
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 let email = ref('')
 let password = ref('')
 let err = ref('')
@@ -43,7 +44,13 @@ function login() {
     }
 
     localStorage.setItem('auth', 'no specific val required')
-    router.push({ name: 'HomeView' })
+    if(route.query.to) {
+        router.push(route.query.to)
+    }
+    else {
+
+        router.push({ name: 'HomeView' })
+    }
 }
 
 </script>
