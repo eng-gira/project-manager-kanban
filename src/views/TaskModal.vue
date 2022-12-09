@@ -1,5 +1,5 @@
 <template>
-    <div class="flex bg-white pin mx-auto mt-3 py-4 px-6 text-left rounded max-w-[700px]">
+    <div class="flex bg-white pin mx-auto mt-3 py-4 px-6 text-left rounded max-w-[700px]" v-if="task">
         <div class="flex flex-col flex-grow justify-between items-start">
             
             <input
@@ -16,14 +16,28 @@
                 @change="updateDescription(task.id, $event)"
             />
 
-            <!-- Members -->
+            <!-- Assignee -->
             <div class="flex justify-start mt-6">
-                <h1 class="text-lg mr-6">Member:</h1>
-                <select class="border border-black py-1">
-                    <option v-for="member in members" :key="member.id" :value="member.id" :selected="member.id==task.userAssigned">
+                <h1 class="text-lg mr-6">Assignee:</h1>
+                <select class="border border-black py-1" v-model="assignee" @change="askToConfirmNewUserAssignment">
+                    <option v-for="member in members" :key="member.id" :value="member.id" :selected="member.id==assignee">
                         {{ member.name }}
                     </option>
                 </select>
+                <div v-if="confirmingNewUserAssignment" class="flex ml-3">
+                    <button
+                            class="py-1 px-2 text-xs rounded-lg bg-gray-700 hover:bg-gray-900 text-white mr-1"
+                            @click="assignNewUser"                        
+                        >
+                            Confirm
+                        </button>
+                        <button
+                            class="py-1 px-2 text-xs rounded-lg bg-gray-300 hover:bg-gray-500 hover:text-white"
+                            @click="cancelNewUserAssignment"                            
+                        >
+                            Cancel
+                        </button>                    
+                </div>
             </div>
 
             <!-- Attachments -->
@@ -74,9 +88,9 @@
     </div>
 </template>
 <script setup>
-import { onBeforeMount, ref } from 'vue';
-import defaultBoard from '@/default-board.js'
-import { onBeforeRouteUpdate } from 'vue-router';
+import { onMounted, ref } from 'vue';
+import projectsData from '@/projectsData.js'
+import { useRoute } from 'vue-router';
 import { comment } from 'postcss';
 
 const props = defineProps({
@@ -84,28 +98,26 @@ const props = defineProps({
 })
 
 let task = ref(null)
-// onBeforeRouteUpdate(() => {
-//     /**
-//      * @todo request the task from the backend after finishing it
-//      */
-//     for(const column of defaultBoard.columns) {
-//         for(const t of column.tasks) {
-//             if(t.id == props.id) {
-//                 task.value = t
-//             }
-//         }
-//     }
-// })
-onBeforeMount(() => {
+let assignee = ref(null)
+let members = ref([])
+const route = useRoute()
+
+onMounted(() => {
     /**
      * @todo request the task from the backend after finishing it
      */
-    for(const column of defaultBoard.columns) {
-        for(const t of column.tasks) {
-            if(t.id == props.id) {
-                task.value = t
+    for(const proj of projectsData.projects) {
+        if(proj.id != route.params.projectId) continue
+        for(const col of proj.columns)
+        {
+            for(const t of col.tasks) {
+                if(t.id == props.id) {
+                    task.value = t
+                    assignee = t.userAssigned
+                }
             }
         }
+        members.value = proj.members
     }
 })
 
@@ -118,24 +130,6 @@ const updateDescription = (taskId, event) => {
     event.target.blur()
 }
 
-let members = ref([
-    {
-        id: 1,
-        name: 'Ich'
-    },
-    {
-        id: 2,
-        name: 'Bru'
-    },
-    {
-        id: 3,
-        name: 'Admin'
-    },
-    {
-        id: 4,
-        name: 'Somebody else'
-    }
-])
 let attachments = ref([
     {
         id: 1,
@@ -144,14 +138,6 @@ let attachments = ref([
     {
         id: 2,
         name: 'Link1'
-    },
-    {
-        id: 3,
-        name: 'Link2'
-    },
-    {
-        id: 4,
-        name: 'File3'
     }
 ])
 let commentBody = ref('')
@@ -165,11 +151,6 @@ let comments = ref([
         id: 2,
         body: 'I have to agree',
         author: 'Mod.',
-    },
-    {
-        id: 3,
-        body: 'I think I dont have to...',
-        author: 'Engineer',
     },
 ])
 const addComment = () => {
@@ -186,4 +167,22 @@ const addComment = () => {
 const emptyCommentField = () => {
     commentBody.value = ''
 }
+
+
+let confirmingNewUserAssignment = ref(false)
+const askToConfirmNewUserAssignment = () => {
+    confirmingNewUserAssignment.value = true
+}
+const cancelNewUserAssignment = () => {
+    confirmingNewUserAssignment.value = false
+    assignee = task.value.userAssigned
+}
+const closeConfirmationOfNewUserAssignment = () => {
+    confirmingNewUserAssignment.value = false
+}
+const assignNewUser = () => {
+    task.value.userAssigned = assignee
+    closeConfirmationOfNewUserAssignment()
+}
+
 </script>

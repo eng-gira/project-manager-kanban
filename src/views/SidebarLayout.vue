@@ -5,16 +5,17 @@
         <div class="flex flex-col self-start h-screen overflow-y-auto w-[320px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
             <div class="flex flex-col mt-6 text-sm px-4">
                 <h1 class="font-bold uppercase mb-3 self-start">Projects</h1>
-                <div
+                <router-link
                     v-for="(project, projectIndex) in projects"
                     :key="projectIndex"
                     class="w-[220px] h-[45px] rounded-md flex flex-col justify-center mb-3"
-                    :class="project.selected===true ? 
+                    :class="project.id==selectedProjectId ? 
                         'bg-[#0C4689] text-white' :
                         'bg-[#F4F4F4] cursor-pointer hover:bg-[#0C4689] hover:text-white'"
+                    :to="{name: 'ProjectView', params: { projectId: project.id }}"
                     >
                     {{ project.name }}
-                </div>
+                </router-link>
             </div>
             <div class="text-xs flex flex-col mt-6 mb-6" v-if="archivedProjects.length <= 0">
                 <h1 class="font-bold uppercase">Archived Projects</h1>
@@ -33,30 +34,25 @@
     </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import projectsData from '@/projectsData.js'
+import { useRoute } from 'vue-router';
+
 
 let archivedProjects = ref([])
+const route = useRoute()
 
-let projects = ref([
-    {
-        id: 1,
-        selected: false,
-        name: 'Build a project-manager'
-    },
-    {
-        id: 2,
-        selected: true,
-        name: 'Build a business-manager'
-    }
-])
+let projects = projectsData.projects
 
-onMounted(() => {
-    // Sort the projects to make the selected appear first
-    for(let i = 0; i < projects.value.length; i++) {
-        if(projects.value[i].selected)
-        {
-            let proj = projects.value.splice(i, 1)[0]
-            projects.value.splice(0, 0, proj)
+
+let selectedProjectId = computed(() => {
+    if(route.params.projectId)
+    {
+        for(let i = 0; i < projects.length; i++) {
+            if(projects[i].id == route.params.projectId)
+            {
+                return projects[i].id
+            }
         }
     }
 })

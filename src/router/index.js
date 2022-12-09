@@ -19,20 +19,26 @@ const routes = [
     path: '/',
     name: 'SidebarLayout',
     component: SidebarLayout,
-    children: [{
-      // path: '/:projectId',
-      path: '/temp-proj-view',
-      name: 'ProjectView',
-      component: ProjectView,
-      children: [
-          {
-            path: 'task/:id',
-            name: 'TaskModal',
-            component: TaskModal,
-            props: true,
-          }
-      ]
-    },
+    children: [
+      {
+        path: '/',
+        name: 'HomeView',
+        component: HomeView
+      },
+      {
+        path: '/:projectId',
+        name: 'ProjectView',
+        component: ProjectView,
+        props: true,
+        children: [
+            {
+              path: 'task/:id',
+              name: 'TaskModal',
+              component: TaskModal,
+              props: true,
+            }
+        ]
+      },
     ]
   },
   // {
