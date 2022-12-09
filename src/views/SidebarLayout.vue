@@ -36,11 +36,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import projectsData from '@/projectsData.js'
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 
 let archivedProjects = ref([])
 const route = useRoute()
+const router = useRouter()
 
 let projects = projectsData.projects
 
@@ -58,8 +59,8 @@ let selectedProjectId = computed(() => {
 })
 
 const logout = () => {
-    alert('log out...')
-    console.log('should log out...')
+    localStorage.removeItem('auth')
+    router.push({ name: 'RegisterView' })
 }
 
 </script>

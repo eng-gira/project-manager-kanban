@@ -1,19 +1,36 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import RegisterView from '../views/RegisterView.vue'
+import LoginView from '../views/LoginView.vue'
+import AuthLayout from '../views/AuthLayout.vue'
 import SidebarLayout from '../views/SidebarLayout.vue'
 import ProjectView from '../views/ProjectView.vue'
 import TaskModal from '../views/TaskModal.vue'
 
 const routes = [
-  // {
-  // // Auth Layout
-  //    path: 'auth',
-  //    name: 'AuthLayout,
-  //    children: [{
-  //      // Login
-  //      // Register
-  //    }]
-  // },
+  {
+  // Auth Layout
+     path: '/auth',
+     name: 'AuthLayout',
+     component: AuthLayout,
+     children: [
+      {
+        path: '',
+        name: 'DefaultAuthRedirect',
+        redirect: { name: 'RegisterView' }
+      },
+      {
+        path: 'register',
+        name: 'RegisterView',
+        component: RegisterView
+      },
+      {
+        path: 'login',
+        name: 'LoginView',
+        component: LoginView
+      },
+     ]
+  },
   {
   // App Layout
     path: '/',
@@ -23,37 +40,27 @@ const routes = [
       {
         path: '/',
         name: 'HomeView',
-        component: HomeView
+        component: HomeView,
+        meta: { requiresAuth: true }
       },
       {
         path: '/:projectId',
         name: 'ProjectView',
         component: ProjectView,
         props: true,
+        meta: { requiresAuth: true },
         children: [
-            {
-              path: 'task/:id',
-              name: 'TaskModal',
-              component: TaskModal,
+          {
+            path: 'task/:id',
+            name: 'TaskModal',
+            meta: { requiresAuth: true },
+            component: TaskModal,
               props: true,
             }
         ]
       },
     ]
   },
-  // {
-  //   path: '/',
-  //   name: 'ProjectView',
-  //   component: ProjectView,
-  //   children: [
-  //     {
-  //       path: 'task/:id',
-  //       name: 'TaskModal',
-  //       component: TaskModal,
-  //       props: true,
-  //     }
-  //   ]
-  // },
   {
     path: '/about',
     name: 'about',
@@ -69,4 +76,14 @@ const router = createRouter({
   routes
 })
 
+router.beforeEach((to, from) => {
+  if(to.meta && to.meta.requiresAuth === true) {
+    if(!localStorage.getItem('auth')) {
+      router.push({ name: 'RegisterView' })
+    }
+  }
+})
+
 export default router
+
+
