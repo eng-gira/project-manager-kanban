@@ -4,8 +4,10 @@
         <!-- bg-blue-100  -->
         <div class="flex flex-col self-start h-screen overflow-y-auto w-[320px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
             <div class="flex flex-col mt-6 text-sm px-4">
-                <h1 class="font-bold uppercase mb-3 self-start">Projects</h1>
+                <h1 class="font-bold mb-3 self-start">Projects</h1>
+                <div v-if="projects.length < 1" class="italic mb-3">Loading...</div>
                 <router-link
+                    v-else
                     v-for="(project, projectIndex) in projects"
                     :key="projectIndex"
                     class="w-[220px] h-[45px] rounded-md flex flex-col justify-center items-start mb-3"
@@ -18,12 +20,13 @@
                 </router-link>
 
                 <div class="text-sm">
+                    <h1 class="italic text-xs" :class="{'text-red-500': errorInCreateProject}" v-if="createProjectStatusMessage"> {{ createProjectStatusMessage }} </h1>
                     <button
                         v-if="!creatingProject"
                         class="bg-[#F4F4F4] hover:underline w-[220px] h-[45px] rounded-md"
                         @click="startCreatingProject"
                         >
-                        New Project
+                        New Project...
                     </button>
                     <div v-else>
                         <input
@@ -54,8 +57,8 @@
     </div>
 </template>
 <script setup>
+import ProjectService from '@/services/ProjectService';
 import { ref, onMounted, computed } from 'vue'
-import projectsData from '@/projectsData.js'
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -63,7 +66,14 @@ let archivedProjects = ref([])
 const route = useRoute()
 const router = useRouter()
 
-let projects = projectsData.projects
+let projects = ref([])
+
+onMounted(() => {
+    ProjectService.getProjects().then((resp) => {
+        projects.value = resp.data
+        // console.log(projects.value)
+    })
+})
 
 
 let selectedProjectId = computed(() => {
@@ -84,15 +94,35 @@ const logout = () => {
 }
 
 let creatingProject = ref(false)
+let createProjectStatusMessage = ref('')
+let errorInCreateProject = ref(false)
 const startCreatingProject = () => {
     creatingProject.value = true
+    errorInCreateProject.value = false
+    createProjectStatusMessage.value = ''
 }
 const closeProjectCreate = () => {
     creatingProject.value = false
 }
 const createProject = (event) => {
+    createProjectStatusMessage.value = 'Loading...'
     if(event.target.value.length > 0) {
-        projects.push({ id: projects.length+1, name: event.target.value, columns: [] })
+        ProjectService.createProject(JSON.stringify({ name: event.target.value })).then((resp) => {
+            if(resp.data.message == 'failed')
+            {
+                errorInCreateProject.value = true
+                createProjectStatusMessage.value = resp.data.data
+                // console.log(resp.data.message)
+            }
+            else {
+                projects.value.push(resp.data.data)
+                createProjectStatusMessage.value = ''
+                // console.log(resp.data.data)
+            }
+        })
+    } else {
+        errorInCreateProject.value = true
+        createProjectStatusMessage.value = 'The name field is required'       
     }
     closeProjectCreate()
 }

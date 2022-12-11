@@ -1,6 +1,6 @@
 <template>
     <div class="h-screen w-screen p-4 bg-[#F5F5F5] overflow-auto">
-        <div class="flex flex-col ml-6">
+        <div class="flex flex-col ml-6" v-if="project">
             <div class="flex space-x-8 items-center mb-6">
                 <h1 class="font-bold text-xl">{{ project.name }}</h1>
                 <div class="rounded-md py-1 px-2 text-sm bg-[#EAEAEA] cursor-pointer" @click="openTeamModal">Team</div>
@@ -175,7 +175,7 @@
 <script setup>
 import { computed, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import projectsData from '@/projectsData.js'
+import ProjectService from '@/services/ProjectService';
 
 const props = defineProps({
     projectId: [String, Number]
@@ -186,17 +186,21 @@ let project = ref(null)
 const route = useRoute()
 const router = useRouter()
 
-watchEffect(() => {
-    
-    let projects =  projectsData.projects
-    for(const p of projects)
-    {
-        if(p.id == props.projectId) {
-            project.value = p
-        }
-    }
-
-    // console.log('project', project.value, 'since projectId was', props.projectId)
+onMounted(() => {
+    watchEffect(() => {
+        // let projects =  projectsData.projects
+        // for(const p of projects)
+        // {
+        //     if(p.id == props.projectId) {
+        //         project.value = p
+        //     }
+        // }
+        ProjectService.getSingleProject(parseInt(props.projectId)).then((resp) => {
+            project.value = resp.data.data
+            console.log(resp.data)
+        })
+        // console.log('project', project.value, 'since projectId was', props.projectId)
+    })
 })
 
 
@@ -220,17 +224,10 @@ const addTask = (event, columnId, columnIndex) => {
         return false
     }
 
-    // Update the UI
-    project.value.columns[columnIndex].tasks.push({
-        id: project.value.columns[columnIndex].tasks.length,
-        name: event.target.value
+    ProjectService.createTask(columnId, JSON.stringify({ name: event.target.value })).then((resp) => {
+        project.value.columns[columnIndex].tasks.push(resp.data.data)
+        console.log('task returned from back', resp.data.data)
     })
-
-    // Send to the backend
-    // ...
-
-    // debug
-    console.log(event.target.value)
 
     event.target.value = ''
 }
@@ -311,19 +308,14 @@ const placeColumn = (toColOfId, toColIndex, event) => {
 
 let columnName = ref('')
 
-const addColumn = (projectId) => {
+const addColumn = () => {
     if(columnName.value.length < 1) return false
     
-    // Update the UI
-    project.value.columns.push({
-        id: project.value.columns.length + 1,
-        name: columnName.value,
-        tasks: []
+    ProjectService.createColumn(project.value.id, JSON.stringify({ name: columnName.value })).then((resp) => {
+        project.value.columns.push(resp.data.data)
+        console.log('Col returned from backend', resp.data.data)
     })
     columnName.value = ''
-
-    // Send to the backend
-    // ...
 }
 
 let confirmColDeletionModalVisible = ref(false)
