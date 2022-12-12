@@ -54,7 +54,7 @@
                                 @dragenter.prevent
                                 >
                                 <span class="w-full font-bold"> 
-                                    {{ task.name }}
+                                    {{ task.name + '(' + task.id + ')' }}
                                 </span>
                                 <p 
                                     v-if="task.description"
@@ -250,9 +250,56 @@ const placeTask = (toColOfId, toColIndex, toTaskIndex, event) => {
     const movedTaskId = event.dataTransfer.getData('task-id')
 
     const movedTask = project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 1)[0]
-    console.log('toTaskIndex', toTaskIndex)
-    if(toTaskIndex != null) project.value.columns[toColIndex].tasks.splice(toTaskIndex, 0, movedTask)
-    else project.value.columns[toColIndex].tasks.push(movedTask)
+
+    if(toTaskIndex != null) {
+        project.value.columns[toColIndex].tasks.splice(toTaskIndex, 0, movedTask)
+
+        ProjectService.relocateTask(movedTaskId, {
+            targetColId: toColOfId,
+            tasksOrderInTargetCol: project.value.columns[toColIndex].tasks.map(($t) => { return $t.id })
+        }).then((resp) => {
+            if(resp.data.message == 'failed') {
+                // replace the task as it was before
+                const reMovedTask = project.value.columns[toColIndex].tasks.splice(toTaskIndex, 1)[0]
+                project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
+
+                console.log('failed', resp.data.data)
+            }
+            else {
+                console.log(resp.data.data)
+            }
+        }).catch(() => {
+                // replace the task as it was before
+                const reMovedTask = project.value.columns[toColIndex].tasks.splice(toTaskIndex, 1)[0]
+                project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
+
+                console.log('caught', resp.data.data)            
+        })
+    }
+    else {
+        project.value.columns[toColIndex].tasks.push(movedTask)
+
+        ProjectService.relocateTask(movedTaskId, {
+            targetColId: toColOfId,
+            tasksOrderInTargetCol: project.value.columns[toColIndex].tasks.map(($t) => { return $t.id })
+        }).then((resp) => {
+            if(resp.data.message == 'failed') {
+                // replace the task as it was before
+                const reMovedTask = project.value.columns[toColIndex].tasks.pop()
+                project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
+
+                console.log('failed', resp.data.data)
+            }
+            else {
+                console.log(resp.data.data)
+            }
+        }).catch(() => {
+            const reMovedTask = project.value.columns[toColIndex].tasks.pop()
+                project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
+
+                console.log('caught', resp.data.data)            
+        })
+    }
 }
     
 const pickupColumn = (fromColOfId, fromColIndex, event) => {

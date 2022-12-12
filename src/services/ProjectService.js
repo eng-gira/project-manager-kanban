@@ -67,6 +67,13 @@ export default {
             }
         })        
     },
+    relocateTask(id, data) {
+        return apiClient.post('tasks/' + id + '/relocate', data, { headers: 
+            {
+                'Content-Type': 'application/json'
+            }
+        })        
+    },
     deleteTask(id) {
         return apiClient.delete('tasks/' + id)         
     },
