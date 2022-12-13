@@ -78,7 +78,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   if(to.meta && to.meta.requiresAuth === true) {
-    if(!localStorage.getItem('auth')) {
+    if(!localStorage.getItem('access_token')) {
       router.push({ name: 'RegisterView', query: { to: to.fullPath } })
     }
   }

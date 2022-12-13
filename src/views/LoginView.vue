@@ -27,6 +27,7 @@
     </div>
 </template>
 <script setup>
+import ProjectService from '@/services/ProjectService'
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -43,14 +44,27 @@ function login() {
         return false
     }
 
-    localStorage.setItem('auth', 'no specific val required')
-    if(route.query.to) {
-        router.push(route.query.to)
-    }
-    else {
+    ProjectService.login({ email: email.value, password: password.value }).then((resp) => {
+        if(resp.data.message == 'failed') {
+            err.value = resp.data.message
+        }
+        else {
+            console.log(resp.data.access_token)
+            localStorage.setItem('access_token', resp.data.access_token)
+            
+            if(route.query.to) {
+                router.push(route.query.to)
+            }
+            else {
+        
+                router.push({ name: 'HomeView' })
+            }
+        }
+        
+    }).catch((err) => {
+        err.value = err
+    });
 
-        router.push({ name: 'HomeView' })
-    }
 }
 
 </script>

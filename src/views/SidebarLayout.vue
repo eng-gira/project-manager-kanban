@@ -89,8 +89,12 @@ let selectedProjectId = computed(() => {
 })
 
 const logout = () => {
-    localStorage.removeItem('auth')
-    router.push({ name: 'RegisterView' })
+    console.log(localStorage.getItem('access_token'))
+    ProjectService.logout().then((resp) => {
+        console.log(resp.data)
+        localStorage.removeItem('access_token')
+        router.push({ name: 'RegisterView' })
+    })
 }
 
 let creatingProject = ref(false)

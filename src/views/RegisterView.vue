@@ -33,6 +33,7 @@
     </div>
 </template>
 <script setup>
+import ProjectService from '@/services/ProjectService'
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -51,15 +52,24 @@ function register() {
         return false
     }
 
-    localStorage.setItem('auth', 'no specific val required')
+    ProjectService.register({ name: name.value, email: email.value, password: password.value }).then((resp) => {
+        if(resp.data.message == 'failed') {
+            err.value = resp.data.data
+        }
+        else {
+            console.log(resp.data.access_token)
+            localStorage.setItem('access_token', resp.data.access_token)
+        }
+        if(route.query.to)
+        {
+            router.push(route.query.to)
+        }
+        else {
+            router.push({ name: 'HomeView' })
+        }
+    });
 
-    if(route.query.to)
-    {
-        router.push(route.query.to)
-    }
-    else {
-        router.push({ name: 'HomeView' })
-    }
+    // localStorage.setItem('auth', 'no specific val required')
 }
 
 </script>

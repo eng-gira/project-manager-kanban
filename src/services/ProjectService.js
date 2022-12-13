@@ -8,6 +8,28 @@ const apiClient = axios.create({
 
 
 export default {
+    register(data) {
+        return apiClient.post('register', data, { 
+            headers: {
+                'Content-Type': 'application/json'
+            }
+         });
+    },
+    login(data) {
+        return apiClient.post('login', data, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    },
+    logout() {
+        return apiClient.post('logout', {  }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        });        
+    },
     getProjects() {
         return apiClient.get('projects');
     },
