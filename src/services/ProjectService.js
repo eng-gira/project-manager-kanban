@@ -21,6 +21,13 @@ export default {
             }
         })
     },
+    updateProject(id, data) {
+        return apiClient.post('projects/' + id, data, { headers: 
+            {
+                'Content-Type': 'application/json'
+            }
+        }) 
+    },
 
     getColumns(projectId) {
         return apiClient.get('projects/' + projectId + '/columns');
@@ -41,6 +48,13 @@ export default {
                 'Content-Type': 'application/json'
             }
         })        
+    },
+    changeColsOrder(projectId, data) {
+        return apiClient.post('projects/' + projectId + '/columns/changeOrder', data, { headers: 
+            {
+                'Content-Type': 'application/json'
+            }
+        })     
     },
     deleteColumn(id) {
         return apiClient.delete('columns/' + id)         

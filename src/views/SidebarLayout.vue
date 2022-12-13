@@ -79,10 +79,10 @@ onMounted(() => {
 let selectedProjectId = computed(() => {
     if(route.params.projectId)
     {
-        for(let i = 0; i < projects.length; i++) {
-            if(projects[i].id == route.params.projectId)
+        for(let i = 0; i < projects.value.length; i++) {
+            if(projects.value[i].id == route.params.projectId)
             {
-                return projects[i].id
+                return projects.value[i].id
             }
         }
     }

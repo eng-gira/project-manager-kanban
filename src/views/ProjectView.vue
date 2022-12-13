@@ -2,7 +2,23 @@
     <div class="h-screen w-screen p-4 bg-[#F5F5F5] overflow-auto">
         <div class="flex flex-col ml-6" v-if="project">
             <div class="flex space-x-8 items-center mb-6">
-                <h1 class="font-bold text-xl">{{ project.name }}</h1>
+                <div class="flex space-x-3">
+                    <h1 v-if="!editingProjectName" class="font-bold text-xl">{{ project.name }}</h1>
+                    <input
+                        v-else
+                        class="p-2 text-xl bg-transparent h-[28px] rounded-md border border-black"
+                        v-model="updatedProjectName"
+                        @focusout="stopEditingProjectName"
+                        @keyup.enter="updateProjectName"
+                        @keyup.esc="stopEditingProjectName"
+                        />
+                    <button
+                        v-if="!editingProjectName"
+                        class="text-xs"
+                        @click="startEditingProjectName"
+                        >(E)
+                    </button>
+                </div>
                 <div class="rounded-md py-1 px-2 text-sm bg-[#EAEAEA] cursor-pointer" @click="openTeamModal">Team</div>
             </div>
             <!-- Project Class Styles -->
@@ -36,14 +52,13 @@
                             </h1>
                             <div class="">
                                 <button class="mr-2" @click="enableEditingColName(column.id)" :disabled="isModalOpen">E</button>
-                                <button @click="openColDeletionConfirmationModal(column.id, columnIndex)" :disabled="isModalOpen">x</button>
+                                <button @click="openColDeletionConfirmationModal(column.id, columnIndex)" :disabled="isModalOpen">D</button>
                             </div>
                         </div>
                         <div class="list-reset">
                             <!-- Task Class Styles -->
-                            <!-- @Note you must specify whether draggable = "true" or "false", and not write draggable -->
                             <div 
-                                class="flex items-center w-full flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline cursor-pointer"
+                                class="w-full shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline cursor-pointer"
                                 v-for="(task, taskIndex) in column.tasks" :key="task.id"
                                 @click="openTask(task.id)"
                                 draggable="true"
@@ -53,14 +68,16 @@
                                 @dragover.prevent
                                 @dragenter.prevent
                                 >
-                                <span class="w-full font-bold"> 
-                                    {{ task.name + '(' + task.id + ')' }}
-                                </span>
-                                <p 
-                                    v-if="task.description"
-                                    class="w-full flex-no-shrink text-sm mt-1">
-                                    {{ task.description }}
-                                </p>
+                                <div class="flex-col">
+                                    <div class="flex justify-between"> 
+                                        <span class="font-bold">{{ task.name + '(' + task.id + ')' }}</span>
+                                    </div>
+                                    <p 
+                                        v-if="task.description"
+                                        class="w-full flex-no-shrink text-sm mt-1">
+                                        {{ task.description }}
+                                    </p>
+                                </div>
                             </div>
         
                             <input
@@ -94,9 +111,8 @@
         <div 
             class="bg-transparent absolute inset-0 semi-transparent overflow-y-auto"
             v-if="isTaskOpen"
-            @click.self="closeTask"
-        >
-            <router-view />
+            >
+            <router-view @close-task="closeTask"/>
         </div>
     
         <!-- Col Deletion Confirmation Modal -->
@@ -174,7 +190,7 @@
 </template>
 <script setup>
 import { computed, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
 
 const props = defineProps({
@@ -182,7 +198,6 @@ const props = defineProps({
 })
 
 let project = ref(null)
-
 const route = useRoute()
 const router = useRouter()
 
@@ -203,20 +218,46 @@ onMounted(() => {
     })
 })
 
-
 let isTaskOpen = computed(() => {
     return route.name === 'TaskModal'
 })
 
 let isModalOpen = ref(false)
 
-const openTask = (id) => {
+const openTask = (taskId) => {
     isModalOpen.value = true
-    router.push({ name: 'TaskModal', params: { projectId: project.value.id, id: id } })
+    router.push({ name: 'TaskModal', params: { projectId: project.value.id, id: taskId } })
 }
-const closeTask = () => {
+const closeTask = (taskId, taskIndexInCol, colIndexInProj, e) => {
+    refreshTask(taskId, taskIndexInCol, colIndexInProj, e)
     isModalOpen.value = false
-    router.push({ name: 'ProjectView', params: { projectId: project.value.id } })
+    router.push({ name: 'ProjectView', params: { projectId: project.value.id  } })
+}
+const refreshTask = (taskId, taskIndexInCol, colIndexInProj, e) => {
+    // // validation
+    // if( !!project.value.columns[colIndexInProj].tasks[taskIndexInCol] &&
+    //     project.value.columns[colIndexInProj].tasks[taskIndexInCol].id != taskId
+    //     )
+    // {
+    //     console.log('Attempted to update the wrong id!')
+    //     return false
+    // }
+    if(e == 'deleted') {
+
+        project.value.columns[colIndexInProj].tasks.splice(taskIndexInCol, 1)
+        return
+    }
+
+    ProjectService.getSingleTask(taskId).then((resp) => {
+        if(resp.data.message != 'failed' && resp.data.data)
+        {
+            console.log('must edit', colIndexInProj, taskIndexInCol)
+            project.value.columns[colIndexInProj].tasks[taskIndexInCol] = resp.data.data
+        } 
+        console.log('from refreshTask', resp.data)
+    }).catch((err) => {
+        console.log('caught:', err)
+    }) 
 }
 const addTask = (event, columnId, columnIndex) => {
     if(event.target.value.length < 1) 
@@ -256,7 +297,7 @@ const placeTask = (toColOfId, toColIndex, toTaskIndex, event) => {
 
         ProjectService.relocateTask(movedTaskId, {
             targetColId: toColOfId,
-            tasksOrderInTargetCol: project.value.columns[toColIndex].tasks.map(($t) => { return $t.id })
+            tasksOrderInTargetCol: project.value.columns[toColIndex].tasks.map((t) => { return t.id })
         }).then((resp) => {
             if(resp.data.message == 'failed') {
                 // replace the task as it was before
@@ -328,6 +369,25 @@ const placeColumn = (toColOfId, toColIndex, event) => {
     const colToMove = project.value.columns.splice(fromColIndex, 1)[0]
     project.value.columns.splice(toColIndex, 0, colToMove)
 
+    ProjectService.changeColsOrder(project.value.id, { 
+        orderedCols: project.value.columns.map((col) => { return col.id })
+     }).then((resp) => {
+        if(resp.data.message == 'fail') {
+            const reMovedCol = project.value.columns.splice(toColIndex, 1)[0]
+            project.value.columns.splice(fromColIndex, 0, reMovedCol)
+
+            console.log('failed:', resp.data.data)
+        }
+        else {
+            console.log(resp.data.data)
+        }
+    }).catch((resp) => {
+        const reMovedCol = project.value.columns.splice(toColIndex, 1)[0]
+        project.value.columns.splice(fromColIndex, 0, reMovedCol)
+
+        console.log('failed:', resp.data)
+    });
+
     // Backend Upate
     // This section is to determine the columns that were forced to move, and the positions where they were moved.
     if(Math.abs(fromColIndex - toColIndex) <= 1) {
@@ -387,12 +447,23 @@ const deleteCol = () => {
     if(colIndex == -1 || colId == -1) return false
 
     // Update the UI
-    project.value.columns.splice(colIndex, 1)[0]
-
-    // Send to the backend
-    // ...
+    const deletedCol = project.value.columns.splice(colIndex, 1)[0]
 
     closeColDeletionConfirmationModal()
+
+    // Send to the backend
+    ProjectService.deleteColumn(colId).then((resp) => {
+        if(resp.data.message == 'failed') {
+            project.value.columns.splice(colIndex, 0, deletedCol)
+            console.log('failed:', resp.data.data)
+        } else {
+            console.log(resp.data.data)
+        }
+    }).catch((resp) => {
+        project.value.columns.splice(colIndex, 0, deletedCol)
+        console.log('failed:', resp.data)
+    })
+
 }
 
 let editingColName = ref(false)
@@ -402,13 +473,31 @@ const enableEditingColName = (colId) => {
     editingColOfId.value = colId
 }
 const updateColName = (colId, colIndex, event) => {
+    if(event.target.value.length < 1 || event.target.value == project.value.columns[colIndex].name) {
+        editingColName.value = false
+        editingColOfId.value = -1        
+        return false
+    }
+
     // Update the UI
+    let oldName = project.value.columns[colIndex].name
     project.value.columns[colIndex].name = event.target.value
     editingColName.value = false
     editingColOfId.value = -1
     
     // Send to the backend
-    // ...
+    ProjectService.updateColumn(colId, { name: event.target.value }).then((resp) => {
+        if(resp.data.message == 'failed') {
+            project.value.columns[colIndex].name = oldName
+            console.log('failed:', resp.data.data)
+        } else {
+            console.log(resp.data.data)
+        }
+        
+    }).catch((resp) => {
+        project.value.columns[colIndex].name = oldName
+        console.log('failed:', resp.data)
+    })
 }
 const disableEditingColName = (colIndex, event) => {
     event.target.value = project.value.columns[colIndex].name
@@ -455,6 +544,42 @@ const removeTeamMember = (memberId, memberIndex) => {
     closeTeamMemberRemovalConfirmation()
 
     // Send to the backend...
+}
+
+let updatedProjectName = ref('')
+let editingProjectName = ref(false)
+
+const stopEditingProjectName = () => {
+    editingProjectName.value = false
+}
+const startEditingProjectName = () => {
+    editingProjectName.value = true
+}
+const updateProjectName = () => {
+    let oldProjectName = project.value.name
+    stopEditingProjectName()
+
+    if(updatedProjectName.value.length < 0 || updatedProjectName.value == oldProjectName) {
+        project.value.name = oldProjectName
+        updatedProjectName.value = ''
+        return false
+    }
+    
+    project.value.name = updatedProjectName.value
+
+    ProjectService.updateProject(project.value.id, { name: updatedProjectName.value }).then((resp) => {
+        if(resp.data.message == 'failed') {
+            project.value.name = oldProjectName
+            console.log('failed:', resp.data.data)
+        } else {
+            console.log(resp.data.data)
+        }
+    }).catch((resp) => {
+        project.value.name = oldProjectName
+        console.log('failed:', resp.data)
+    })
+
+    updatedProjectName.value = ''
 }
 </script> 
 
