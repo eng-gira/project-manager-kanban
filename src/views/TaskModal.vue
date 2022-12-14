@@ -111,7 +111,7 @@
                         <div v-if="editingCommentOfId != comment.id">{{ comment.body }}</div>
                         <textarea v-else placeholder="{{comment.body}}" v-model="commentBodyBeingEdited[comment.id]"/>
                     </div>
-                    <h1 class="italic text-lg mx-auto" v-if="task.comments.length < 1">No Comments Yet</h1>
+                    <h1 class="italic mx-auto mt-3" v-if="task.comments.length < 1">No Comments Yet</h1>
                 </div>
             </div>
         </div>
