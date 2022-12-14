@@ -44,14 +44,14 @@ function login() {
         return false
     }
 
-    ProjectService.login({ email: email.value, password: password.value }).then((resp) => {
+    ProjectService.login(JSON.stringify({ email: email.value, password: password.value })).then((resp) => {
         if(resp.data.message == 'failed') {
             err.value = resp.data.message
         }
         else {
             console.log(resp.data.access_token)
             localStorage.setItem('access_token', resp.data.access_token)
-            
+
             if(route.query.to) {
                 router.push(route.query.to)
             }

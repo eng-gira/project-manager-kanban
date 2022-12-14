@@ -145,32 +145,34 @@
             <div class="flex flex-col bg-white w-[300px] rounded-lg p-2">
                 <h1 class="font-bold text-lg mb-6">Team Members</h1>
                 <div v-for="(member, memberIndex) in project.members" :key="member.id" class="flex justify-between mb-3">
-                    <h1>{{ member.name }}</h1>
-                    <div
-                        v-if="confirmingTeamMemberRemoval === true && confirmingRemovalOfTeamMemberOfIndex == memberIndex"
-                        >
+                    <h1>{{ member.user_email }}</h1>
+                    <div v-if="isProjectAdmin && member.user_id != project.admin_id">
+                        <div
+                            v-if="confirmingTeamMemberRemoval === true && confirmingRemovalOfTeamMemberOfIndex == memberIndex"
+                            >
+                            <button
+                                class="py-1 px-2 text-xs rounded-lg bg-red-300 hover:bg-red-500 hover:text-white mr-3"
+                                @click="removeTeamMember(member.user_email, memberIndex)"                        
+                            >
+                                Confirm
+                            </button>
+                            <button
+                                class="py-1 px-2 text-xs rounded-lg bg-gray-300 hover:bg-gray-500 hover:text-white"
+                                @click="closeTeamMemberRemovalConfirmation"                            
+                            >
+                                Cancel
+                            </button>
+                        </div>
                         <button
-                            class="py-1 px-2 text-xs rounded-lg bg-red-300 hover:bg-red-500 hover:text-white mr-3"
-                            @click="removeTeamMember(member.id, memberIndex)"                        
-                        >
-                            Confirm
-                        </button>
-                        <button
-                            class="py-1 px-2 text-xs rounded-lg bg-gray-300 hover:bg-gray-500 hover:text-white"
-                            @click="closeTeamMemberRemovalConfirmation"                            
-                        >
-                            Cancel
+                            v-else
+                            class="py-1 px-2 text-xs rounded-lg bg-yellow-300 hover:bg-yellow-500"
+                            @click="askToConfirmTeamMemberRemoval(member.id, memberIndex)"
+                            >
+                            Remove Member
                         </button>
                     </div>
-                    <button
-                        v-else
-                        class="py-1 px-2 text-xs rounded-lg bg-yellow-300 hover:bg-yellow-500"
-                        @click="askToConfirmTeamMemberRemoval(member.id, memberIndex)"
-                        >
-                        Remove Member
-                    </button>
                 </div>
-                <div class="flex justify-between mt-3">
+                <div class="flex justify-between mt-3" v-if="isProjectAdmin">
                     <input
                         type="text"
                         class="p-2 mr-2 text-xs flex-grow bg-transparent border border-black rounded-md h-[28px]"
@@ -192,6 +194,7 @@
 import { computed, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
+import jwt_decode from "jwt-decode";
 
 const props = defineProps({
     projectId: [String, Number]
@@ -216,6 +219,13 @@ onMounted(() => {
         })
         // console.log('project', project.value, 'since projectId was', props.projectId)
     })
+})
+
+let isProjectAdmin = computed(() => {
+    const token = localStorage.getItem('access_token')
+    let decoded = jwt_decode(token)
+
+    return project.value == null ? false : (decoded.user.id == project.value.admin_id)
 })
 
 let isTaskOpen = computed(() => {
@@ -517,12 +527,23 @@ const closeTeamModal = () => {
 }
 let emailOfMemberToAdd = ref('')
 const addMember = () => {
-    if(
-        emailOfMemberToAdd.value.length > 0
-        // ||  Already Exists
-    ) {
-        console.log('User of email', emailOfMemberToAdd.value, 'should be added.')
-        project.value.members.push({id: -90, name: 'NewlyAdded', email: emailOfMemberToAdd.value})
+    if(emailOfMemberToAdd.value.length > 0) {
+        ProjectService.addMember(
+            project.value.id, 
+            JSON.stringify( {email: emailOfMemberToAdd.value } )
+        ).then((resp) => {
+                if(resp.data.message != 'failed')
+                {
+                    console.log('returned member', resp.data.data)
+                    project.value.members.push(resp.data.data)
+                }
+                else {
+                    console.log('failed:', resp.data.data)
+                }
+        }).catch((err) => {
+                console.log('caught', err)
+        })
+        
         emailOfMemberToAdd.value = ''
     }
 }
@@ -537,11 +558,15 @@ const closeTeamMemberRemovalConfirmation = () => {
     confirmingTeamMemberRemoval.value = false
     confirmingRemovalOfTeamMemberOfIndex.value = -1
 }
-const removeTeamMember = (memberId, memberIndex) => {
-    // Update the UI    
-    project.value.members.splice(memberIndex, 1)[0]
+const removeTeamMember = (memberEmail, memberIndex) => {
 
-    closeTeamMemberRemovalConfirmation()
+    ProjectService.removeMember(project.value.id, JSON.stringify({ email: memberEmail })).then((resp) => {
+        if(resp.data.message != 'failed') {
+            project.value.members.splice(memberIndex, 1)[0]
+            closeTeamMemberRemovalConfirmation()
+        }
+    })
+
 
     // Send to the backend...
 }

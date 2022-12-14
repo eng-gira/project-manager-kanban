@@ -52,7 +52,7 @@ function register() {
         return false
     }
 
-    ProjectService.register({ name: name.value, email: email.value, password: password.value }).then((resp) => {
+    ProjectService.register(JSON.stringify({ name: name.value, email: email.value, password: password.value })).then((resp) => {
         if(resp.data.message == 'failed') {
             err.value = resp.data.data
         }

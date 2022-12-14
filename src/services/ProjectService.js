@@ -31,22 +31,32 @@ export default {
         });        
     },
     getProjects() {
-        return apiClient.get('projects');
+        return apiClient.get('projects', {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            }
+        });
     },
     getSingleProject(id) {
-        return apiClient.get('projects/' + id)
+        return apiClient.get('projects/' + id, {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            }            
+        })
     },
     createProject(data) {
         return apiClient.post('projects', data, { headers: 
             {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
             }
         })
     },
     updateProject(id, data) {
         return apiClient.post('projects/' + id, data, { headers: 
             {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
             }
         }) 
     },
@@ -113,4 +123,31 @@ export default {
     deleteTask(id) {
         return apiClient.delete('tasks/' + id)         
     },
+    // Members
+    getMembers(projectId) {
+        // 'projects/{projectId}/getMembers'
+        return apiClient.get('projects/', projectId, '/getMembers', {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })
+    },
+    addMember(projectId, data) {
+        // 'projects/{projectId}/addMember'
+        return apiClient.post('projects/' + projectId + '/addMember', data, { 
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            }
+         })
+    },
+    removeMember(projectId, data) {
+        return apiClient.post('projects/' + projectId + '/removeMember', data, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })
+    }
 }
