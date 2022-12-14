@@ -276,8 +276,10 @@ const addTask = (event, columnId, columnIndex) => {
     }
 
     ProjectService.createTask(columnId, JSON.stringify({ name: event.target.value })).then((resp) => {
-        project.value.columns[columnIndex].tasks.push(resp.data.data)
-        console.log('task returned from back', resp.data.data)
+        if(resp.data.message != 'failed') {
+            project.value.columns[columnIndex].tasks.push(resp.data.data)
+        }
+        console.log('resp returned from back', resp.data.data)
     })
 
     event.target.value = ''
@@ -429,8 +431,10 @@ const addColumn = () => {
     if(columnName.value.length < 1) return false
     
     ProjectService.createColumn(project.value.id, JSON.stringify({ name: columnName.value })).then((resp) => {
-        project.value.columns.push(resp.data.data)
-        console.log('Col returned from backend', resp.data.data)
+        if(resp.data.message != 'failed') {
+            project.value.columns.push(resp.data.data)
+        }
+        console.log('resp returned from backend', resp.data.data)
     })
     columnName.value = ''
 }
