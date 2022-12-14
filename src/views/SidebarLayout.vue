@@ -70,7 +70,7 @@ let projects = ref([])
 
 onMounted(() => {
     ProjectService.getProjects().then((resp) => {
-        projects.value = resp.data
+        projects.value = resp.data.data
         // console.log(projects.value)
     })
 })
