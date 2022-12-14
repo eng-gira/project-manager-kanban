@@ -22,11 +22,12 @@ export default {
             }
         });
     },
-    logout() {
+    // Needs the access token as it is deleted in the UI before sending to backend
+    logout(token) {
         return apiClient.post('logout', {  }, {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                'Authorization': 'Bearer ' + token
             }
         });        
     },
@@ -185,5 +186,46 @@ export default {
                 Authorization: 'Bearer ' + localStorage.getItem('access_token')
             }
         })
-    }
+    },
+    // Comments
+    getComments(taskId) {
+        return apiClient.get('tasks/', taskId, '/comments', {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })      
+    },
+    getSingleComment(id) {
+        return apiClient.get('comments/' + id, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })
+    },
+    createComment(taskId, data) {
+        return apiClient.post('tasks/' + taskId +'/comments', data, { headers: 
+            {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })    
+    },
+    updateComment(id, data) {
+        return apiClient.post('comments/' + id, data, { headers: 
+            {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })    
+    },
+    deleteComment(id) {
+        return apiClient.delete('comments/' + id, { headers: 
+            {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })    
+    },        
 }

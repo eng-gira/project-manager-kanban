@@ -84,14 +84,34 @@
 
                     <!-- List of Comments -->
                     <div
-                        v-for="comment in comments"
+                        v-for="(comment, commentIndex) in task.comments"
                         :key="comment.id"
                         class="bg-slate-200 rounded-lg flex flex-col space-y-3 mt-3 p-2"
                         >
-                        <h1 class="font-bold">{{ comment.author }}</h1>
-                        <div>{{ comment.body }}</div>
+                        <div class="flex justify-between">
+                            <h1 class="font-bold">{{ comment.author_id }}</h1>
+
+                            <!-- Controls -->
+                            <div v-if="comment.author_id == authUser.id">
+                                
+                                <button v-if="editingCommentOfId != comment.id" @click="startEditingComment(comment.id, comment.body)"
+                                    class="text-xs bg-yellow-300 hover:bg-yellow-500 px-2 py-1 rounded-lg">
+                                    (E)
+                                </button>
+                                <div v-else>
+                                    <button class="text-xs bg-blue-300 hover:bg-blue-500 px-2 py-1 rounded-lg" @click="updateComment(comment.id, commentIndex)">Save</button>
+                                    <button class="text-xs bg-gray-300 hover:bg-gray-500 px-2 py-1 rounded-lg" @click="stopEditingComment">Cancel</button>
+                                </div>
+
+                                <button @mousedown="deleteComment(comment.id, commentIndex)" class="text-xs bg-red-300 hover:bg-red-500 px-2 py-1 rounded-lg">
+                                    (D)
+                                </button>
+                            </div>
+                        </div>
+                        <div v-if="editingCommentOfId != comment.id">{{ comment.body }}</div>
+                        <textarea v-else placeholder="{{comment.body}}" v-model="commentBodyBeingEdited[comment.id]"/>
                     </div>
-                    <h1 class="italic text-lg mx-auto" v-if="comments.length < 1">No Comments Yet</h1>
+                    <h1 class="italic text-lg mx-auto" v-if="task.comments.length < 1">No Comments Yet</h1>
                 </div>
             </div>
         </div>
@@ -101,6 +121,7 @@
 import { onMounted, ref, defineEmits } from 'vue';
 import { useRoute } from 'vue-router';
 import ProjectService from '@/services/ProjectService';
+import jwt_decode from "jwt-decode";
 
 const props = defineProps({
     id: [String, Number]
@@ -113,6 +134,7 @@ let colIndexInProj = ref(-1)
 let assigneeId = ref(null)
 let members = ref([])
 const route = useRoute()
+let authUser = ref(null)
 
 onMounted(() => {
     ProjectService.getSingleTask(props.id).then((resp) => {
@@ -146,6 +168,11 @@ onMounted(() => {
     }).catch((resp) => {
         console.log('failed to get single project:', resp.data)
     })
+
+    // Get the user data from token
+    const token = localStorage.getItem('access_token')
+    let decoded = jwt_decode(token)
+    authUser.value = decoded.user
 })
 
 
@@ -241,31 +268,55 @@ let attachments = ref([
     }
 ])
 let commentBody = ref('')
-let comments = ref([
-    {
-        id: 1,
-        body: 'I find the task interesting',
-        author: 'Admin',
-    },
-    {
-        id: 2,
-        body: 'I have to agree',
-        author: 'Mod.',
-    },
-])
 const addComment = () => {
     if(commentBody.value.length < 1) return false
 
-    comments.value.push({
-        id: comments.value.length + 1,
-        body: commentBody.value,
-        author: 'Developer'
+    ProjectService.createComment(task.value.id, JSON.stringify({ body: commentBody.value })).then((resp) => {
+        if(resp.data.message != 'failed') {
+
+            task.value.comments.push(resp.data.data)
+        }
+        console.log(resp.data.data)
     })
 
     commentBody.value = ''
 }
 const emptyCommentField = () => {
     commentBody.value = ''
+}
+
+let editingCommentOfId = ref(-1)
+let commentBodyBeingEdited = ref({})
+const startEditingComment = (id, currentCommentBody) => {
+    // Only edit one comment at a time
+    if(editingCommentOfId.value == -1) {
+        editingCommentOfId.value = id
+        commentBodyBeingEdited.value[id] = currentCommentBody
+    }
+}
+const stopEditingComment = () => {
+    editingCommentOfId.value = -1
+}
+const updateComment = (id, commentIndex) => {
+    const newBody = commentBodyBeingEdited.value[id]
+    commentBodyBeingEdited.value[id] = ''
+    stopEditingComment()
+
+    ProjectService.updateComment(id, JSON.stringify({ body: newBody })).then((resp) => {
+        if(resp.data.message != 'failed')
+        {
+            task.value.comments[commentIndex].body = resp.data.data.body
+        }
+    })
+}
+
+const deleteComment = (id, commentIndex) => {
+    ProjectService.deleteComment(id).then((resp) => {
+        if(resp.data.message != 'failed')
+        {
+            task.value.comments.splice(commentIndex, 1)[0]
+        }
+    })
 }
 
 

@@ -89,13 +89,13 @@ let selectedProjectId = computed(() => {
 })
 
 const logout = () => {
+    ProjectService.logout(localStorage.getItem('access_token')).then((resp) => {
+        console.log(resp.data)
+    })
+    
     // Do not need BE confirmation to log out.
     localStorage.removeItem('access_token')
     router.push({ name: 'RegisterView' })
-
-    ProjectService.logout().then((resp) => {
-        console.log(resp.data)
-    })
 }
 
 let creatingProject = ref(false)
