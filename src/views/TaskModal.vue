@@ -95,16 +95,16 @@
                             <div v-if="comment.author_id == authUser.id">
                                 
                                 <button v-if="editingCommentOfId != comment.id" @click="startEditingComment(comment.id, comment.body)"
-                                    class="text-xs bg-yellow-300 hover:bg-yellow-500 px-2 py-1 rounded-lg">
-                                    (E)
+                                    class="text-xs hover:underline font-bold mr-3">
+                                    Edit
                                 </button>
                                 <div v-else>
                                     <button class="text-xs bg-blue-300 hover:bg-blue-500 px-2 py-1 rounded-lg" @click="updateComment(comment.id, commentIndex)">Save</button>
                                     <button class="text-xs bg-gray-300 hover:bg-gray-500 px-2 py-1 rounded-lg" @click="stopEditingComment">Cancel</button>
                                 </div>
 
-                                <button @mousedown="deleteComment(comment.id, commentIndex)" class="text-xs bg-red-300 hover:bg-red-500 px-2 py-1 rounded-lg">
-                                    (D)
+                                <button @mousedown="deleteComment(comment.id, commentIndex)" class="text-xs hover:underline font-bold">
+                                    Delete
                                 </button>
                             </div>
                         </div>
