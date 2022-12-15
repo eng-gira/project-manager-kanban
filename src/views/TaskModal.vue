@@ -26,11 +26,11 @@
 
 
                 <!-- Assignee -->
-                <div class="flex justify-start mt-6">
+                <div class="flex justify-start mt-6" v-if="members && members.length > 0">
                     <h1 class="text-lg mr-6">Assignee:</h1>
                     <select class="border border-black py-1" v-model="assigneeId" @change="askToConfirmNewUserAssignment">
-                        <option v-for="member in members" :key="member.id" :value="member.id" :selected="member.id==assigneeId">
-                            {{ member.name }}
+                        <option v-for="member in members" :key="member.user_id" :value="member.user_id" :selected="member.user_id==assigneeId">
+                            {{ member.user_email }}
                         </option>
                     </select>
                     <div v-if="confirmingNewUserAssignment" class="flex ml-3">
@@ -50,7 +50,7 @@
                 </div>
 
                 <!-- Attachments -->
-                <div class="flex justify-start space-x-2 mt-6 items-center">
+                <div v-if="attachments && attachments.length > 0" class="flex justify-start space-x-2 mt-6 items-center">
                     <h1 class="text-lg mr-6">Attachments:</h1>
                     <div v-for="attachment in attachments" :key="attachment.id" class="p-2 bg-gray-200 hover:bg-gray-300 rounded-lg">
                         {{ attachment.name }}
@@ -135,6 +135,7 @@ let assigneeId = ref(null)
 let members = ref([])
 const route = useRoute()
 let authUser = ref(null)
+const attachments = ref(null)
 
 onMounted(() => {
     ProjectService.getSingleTask(props.id).then((resp) => {
@@ -142,7 +143,7 @@ onMounted(() => {
             console.log('failed:', resp.data.data)
         } else {
             task.value = resp.data.data
-            assigneeId.value = resp.data.data.assignee_id
+            assigneeId.value = task.value.assignee_id
         }
     }).catch((resp) => {
         console.log('failed:', resp.data)
@@ -257,16 +258,6 @@ const emitCloseTask = (e = null) => {
         emit('close-task', task.value.id, taskIndexInCol.value, colIndexInProj.value, e)
 }
 
-let attachments = ref([
-    {
-        id: 1,
-        name: 'File1'
-    },
-    {
-        id: 2,
-        name: 'Link1'
-    }
-])
 let commentBody = ref('')
 const addComment = () => {
     if(commentBody.value.length < 1) return false
@@ -326,13 +317,25 @@ const askToConfirmNewUserAssignment = () => {
 }
 const cancelNewUserAssignment = () => {
     confirmingNewUserAssignment.value = false
-    assigneeId.value = task.value.assigneeId
+    assigneeId.value = task.value.assignee_id
 }
 const closeConfirmationOfNewUserAssignment = () => {
     confirmingNewUserAssignment.value = false
 }
 const assignNewUser = () => {
-    task.value.assigneeId = assigneeId.value
+    ProjectService.updateTask(task.value.id, JSON.stringify({ name: task.value.name, assignee_id: assigneeId.value })).then((resp) => {
+        if(resp.data.message == 'failed')
+        {
+            assigneeId.value = task.value.assignee_id
+            console.log('failed:', resp.data.data)
+        } else 
+        {
+            task.value.assignee_id = resp.data.data.assignee_id // assigning task.assignee_id to the new task is assignee id returned from backend
+            assigneeId.value = task.value.assignee_id // storing the new assignee_id in the ref assigneeId
+            console.log(resp.data.data)
+        }
+
+    })
     closeConfirmationOfNewUserAssignment()
 }
 
