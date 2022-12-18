@@ -2,24 +2,42 @@
     <div class="h-screen w-screen p-4 bg-[#F5F5F5] overflow-auto">
         <div class="flex flex-col ml-6" v-if="project">
             <div class="flex space-x-8 items-center mb-6">
-                <div class="flex space-x-3">
-                    <h1 v-if="!editingProjectName" class="font-bold text-xl">{{ project.name }}</h1>
-                    <input
-                        v-else
-                        class="p-2 text-xl bg-transparent h-[28px] rounded-md border border-black"
-                        v-model="updatedProjectName"
-                        @focusout="stopEditingProjectName"
-                        @keyup.enter="updateProjectName"
-                        @keyup.esc="stopEditingProjectName"
-                        />
-                    <button
-                        v-if="!editingProjectName"
-                        class="text-xs"
-                        @click="startEditingProjectName"
-                        >(E)
-                    </button>
+                <div class="w-full flex justify-between items-center"> <!-- space-x-3 -->
+                    <div class="flex items-center">
+                        <h1 v-if="!editingProjectName" class="font-bold text-xl">{{ project.name }}</h1>
+                        <input
+                            v-else
+                            class="p-2 text-xl bg-transparent h-[28px] rounded-md border border-black"
+                            v-model="updatedProjectName"
+                            @focusout="stopEditingProjectName"
+                            @keyup.enter="updateProjectName"
+                            @keyup.esc="stopEditingProjectName"
+                            />
+                        <button
+                            v-if="!editingProjectName"
+                            class="text-xs ml-3"
+                            @click="startEditingProjectName"
+                            >(E)
+                        </button>
+                        <div class="rounded-md py-1 px-2 text-sm bg-[#EAEAEA] cursor-pointer ml-6" @click="openTeamModal">Team</div>
+                    </div>
+                    <div v-if="isProjectAdmin">
+                        <button
+                            v-if="project.archived == 0"
+                            class="bg-red-300 hover:bg-red-500 hover:text-white text-sm px-2 py-1 rounded-lg"
+                            @click="addToArchive"
+                            >
+                            Archive
+                        </button>
+                        <button
+                            v-else
+                            class="bg-gray-300 hover:bg-gray-500 hover:text-white text-sm px-2 py-1 rounded-lg"
+                            @click="unarchive"
+                            >
+                            Unarchive
+                        </button>
+                    </div>
                 </div>
-                <div class="rounded-md py-1 px-2 text-sm bg-[#EAEAEA] cursor-pointer" @click="openTeamModal">Team</div>
             </div>
             <!-- Project Class Styles -->
             <div class="">
@@ -612,6 +630,23 @@ const updateProjectName = () => {
     })
 
     updatedProjectName.value = ''
+}
+
+const addToArchive = () => {
+    ProjectService.addToArchive(project.value.id).then((resp) => {
+        if(resp.data.message != 'failed') {
+            // to refresh sidebar too
+            window.location = '/' + project.value.id
+        }
+    })
+}
+const unarchive = () => {
+    ProjectService.removeFromArchive(project.value.id).then((resp) => {
+        if(resp.data.message != 'failed') {
+            // to refresh sidebar too
+            window.location = '/' + project.value.id
+        }
+    })
 }
 </script> 
 

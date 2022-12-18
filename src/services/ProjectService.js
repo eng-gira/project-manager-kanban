@@ -188,7 +188,29 @@ export default {
             }
         }) 
     },
-
+    addToArchive(id) {
+        return protectedEPClient.post('projects/addToArchive/' + id, {}, { headers: 
+            {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })     
+    },
+    removeFromArchive(id) {
+        return protectedEPClient.post('projects/removeFromArchive/' + id, {}, { headers: 
+            {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })     
+    },
+    getArchivedProjects() {
+        return protectedEPClient.get('archive/projects', {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            }            
+        })        
+    },
     getColumns(projectId) {
         return protectedEPClient.get('projects/' + projectId + '/columns', {
             headers: {
@@ -354,5 +376,5 @@ export default {
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
             }
         })    
-    },        
+    },    
 }

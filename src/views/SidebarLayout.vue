@@ -40,8 +40,19 @@
                     </div>
                 </div>
             </div>
-            <div class="text-xs flex flex-col mt-6 mb-6" v-if="archivedProjects.length <= 0">
-                <h1 class="font-bold uppercase">Archived Projects</h1>
+            <div class="text-xs flex flex-col mt-6 mb-6 px-4" v-if="archivedProjects.length > 0">
+                <h1 class="font-bold uppercase mb-3">Archived Projects</h1>
+                <router-link
+                    v-for="(archivedProject, archivedProjectIndex) in archivedProjects"
+                    :key="archivedProjectIndex"
+                    class="w-[220px] h-[28px] rounded-md flex flex-col justify-center items-start mb-3"
+                    :class="archivedProject.id==selectedProjectId ? 
+                        'bg-gray-500 text-white' :
+                        'bg-[#F4F4F4] cursor-pointer hover:bg-gray-500 hover:text-white'"
+                    :to="{name: 'ProjectView', params: { projectId: archivedProject.id }}"
+                    >
+                    <h1 class="ml-3">{{ archivedProject.name }}</h1>
+                </router-link>
             </div>
             <div class="mt-auto self-center">
                 <div
@@ -73,6 +84,11 @@ onMounted(() => {
         projects.value = resp.data.data
         // console.log(projects.value)
     })
+
+    ProjectService.getArchivedProjects().then((resp) => {
+        if(resp.data.message != 'failed')
+            archivedProjects.value = resp.data.data
+    })
 })
 
 
@@ -85,6 +101,14 @@ let selectedProjectId = computed(() => {
                 return projects.value[i].id
             }
         }
+
+        // if reached here, nothing was found. Therefore, it is archived or a 404
+        for(let i = 0; i < archivedProjects.value.length; i++) {
+            if(archivedProjects.value[i].id == route.params.projectId)
+            {
+                return archivedProjects.value[i].id
+            }
+        }
     }
 })
 
@@ -92,7 +116,7 @@ const logout = () => {
     // Do not need BE confirmation to log out.
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('access_token')
-    router.push({ name: 'RegisterView' })
+    router.push({ name: 'LoginView' })
 }
 
 let creatingProject = ref(false)
