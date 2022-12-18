@@ -22,12 +22,20 @@ const routes = [
       {
         path: 'register',
         name: 'RegisterView',
-        component: RegisterView
+        component: RegisterView,
+        beforeEnter: () => {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+        }
       },
       {
         path: 'login',
         name: 'LoginView',
-        component: LoginView
+        component: LoginView,
+        beforeEnter: () => {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+        }
       },
      ]
   },

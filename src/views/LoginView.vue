@@ -28,7 +28,7 @@
 </template>
 <script setup>
 import ProjectService from '@/services/ProjectService'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -36,6 +36,15 @@ const route = useRoute()
 let email = ref('')
 let password = ref('')
 let err = ref('')
+
+/**
+ * For debugging purposes; delete after finishing
+ */
+onMounted(() => {
+    if(route.query.dd) {
+        console.log(JSON.parse(route.query.dd))
+    }
+})
 
 function login() {
     if(email.value.length < 1 || password.value.length < 1)
@@ -51,6 +60,7 @@ function login() {
         else {
             console.log(resp.data.access_token)
             localStorage.setItem('access_token', resp.data.access_token)
+            localStorage.setItem('refresh_token', resp.data.refresh_token)
 
             if(route.query.to) {
                 router.push(route.query.to)

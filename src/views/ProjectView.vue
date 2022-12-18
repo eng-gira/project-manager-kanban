@@ -195,6 +195,7 @@ import { computed, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
+import { expiryData, hasExpired } from '@/utils';
 
 const props = defineProps({
     projectId: [String, Number]
@@ -219,6 +220,8 @@ onMounted(() => {
         })
         // console.log('project', project.value, 'since projectId was', props.projectId)
     })
+    expiryData(localStorage.getItem('access_token'))
+    console.log(hasExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
 })
 
 let isProjectAdmin = computed(() => {

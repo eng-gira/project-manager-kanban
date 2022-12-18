@@ -1,52 +1,179 @@
 import axios from 'axios'
+import router from '@/router'
+import { hasExpired } from '@/utils'
 
-
-const apiClient = axios.create({
+// const apiClient = axios.create({
+//     baseURL: 'http://localhost:8000/api',
+//     withCredentials: false,
+// })
+/**
+ * Used for requests to protected endpoints.
+ */
+const protectedEPClient = axios.create({
     baseURL: 'http://localhost:8000/api',
     withCredentials: false,
 })
+/**
+ * Used for refreshing the token.
+ */
+const refreshClient = axios.create({
+    baseURL: 'http://localhost:8000/api/refresh',
+    withCredentials: false, 
+})
 
+// Add a request interceptor
+protectedEPClient.interceptors.request.use(async function (config) {
+    // console.log('req. interceptor - config:', config)
+    // console.log('req. interceptor - config.headers.Authorization:', config.headers.Authorization)
+
+    // Do something before request is sent
+    if(hasExpired(localStorage.getItem('access_token')))
+    {
+        console.log('access_token HAS expired')
+
+        // Request a new access token
+        try {
+            let resp = await refreshClient.post('', {}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('refresh_token'),
+                    'ExpTok': localStorage.getItem('access_token')
+                }
+            })
+            // console.log('refresh token request resp:', resp.status)
+            if(resp.data.access_token) {
+                // console.log('refreshed access_token', resp.data.access_token)
+                localStorage.setItem('access_token', resp.data.access_token)
+                config.headers.Authorization = 'Bearer ' + resp.data.access_token
+                // console.log('the sent authorization header after rfr4:', config.headers.Authorization)
+                return config
+            } else 
+            {
+                console.log('no access token refreshed, must login also, resp:', resp)
+                localStorage.removeItem('access_token')
+                localStorage.removeItem('refresh_token')
+
+                
+                window.location = '/auth/login'
+                return Promise.reject();
+            }
+        }
+        catch(e) {
+            console.log('error at refreshing...')
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('refresh_token')
+
+            window.location = '/auth/login'
+
+            return Promise.reject()
+        }
+        
+    } else {
+        return config
+    }
+}, function (error) {
+    // Do something with request error
+    return Promise.reject('REQUEST ERROR: ' + error);
+});
+
+// let refreshingInAction = false
+// protectedEPClient.interceptors.response.use(function (response) {
+//     // Any status code that lie within the range of 2xx cause this function to trigger
+//     // Do something with response data
+//     // console.log('successful - response:', response)
+//     // console.log('successful - response.config.url:', response.config.url)
+//     // console.log('router.currentRoute', router.currentRoute)
+//     // console.log('curr path', router.currentRoute.value.fullPath)
+
+//     if(refreshingInAction) return
+
+//     return response;
+//   }, function (error) {
+//     if(refreshingInAction) return
+
+//     // Any status codes that falls outside the range of 2xx cause this function to trigger
+//     // Do something with response error
+//     console.log('error:', error)
+//     console.log('error.response.status:', error.response.status)
+//     console.log('error - response.config.url:', error.response.config.url)
+
+//     if(error.response.status == 401) {
+//         if(!refreshingInAction) {
+//             // if only one
+//             if(hasExpired(localStorage.getItem('access_token'))) {
+//                 console.log('access_token expired here...')
+
+//                 if(hasExpired(localStorage.getItem('refresh_token'))) {
+//                     console.log('refresh token expired too!!')
+    
+//                     localStorage.removeItem('access_token')
+//                     localStorage.removeItem('refresh_token')
+//                     router.push({ name: 'RegisterView'  })
+//                     return 
+//                 }
+
+//                 refreshingInAction = true
+//                 // Refresh: request a new access token
+//                 refreshClient.post('', {}, {
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'Authorization': 'Bearer ' + localStorage.getItem('refresh_token')      
+//                     }
+//                 }).then((resp) => {
+//                     console.log('resp.status:', resp.status)
+//                     if(resp.data.access_token) {
+//                         localStorage.setItem('access_token', resp.data.access_token)
+//                         router.push(router.currentRoute.value.fullPath)
+//                     }
+//                 }).finally(() => {
+//                     refreshingInAction = false
+//                 })
+//             }
+//             else 
+//             {
+//                 console.log('neither expired.')
+//                 router.push({ name: 'RegisterView'  })
+//             }
+//         } else {
+//             console.log('the else block. Refreshing in action..')
+//             return
+//         }
+//     }
+
+//     return Promise.reject(error);
+// })
 
 export default {
     register(data) {
-        return apiClient.post('register', data, { 
+        return axios.post('http://localhost:8000/api/register', data, { 
             headers: {
                 'Content-Type': 'application/json'
             }
          });
     },
     login(data) {
-        return apiClient.post('login', data, {
+        return axios.post('http://localhost:8000/api/login', data, {
             headers: {
                 'Content-Type': 'application/json'
             }
         });
     },
-    // Needs the access token as it is deleted in the UI before sending to backend
-    logout(token) {
-        return apiClient.post('logout', {  }, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            }
-        });        
-    },
     getProjects() {
-        return apiClient.get('projects', {
+        return protectedEPClient.get('projects', {
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem('access_token')
             }
         });
     },
     getSingleProject(id) {
-        return apiClient.get('projects/' + id, {
+        return protectedEPClient.get('projects/' + id, {
             headers: {
                 Authorization: 'Bearer ' + localStorage.getItem('access_token')
             }            
         })
     },
     createProject(data) {
-        return apiClient.post('projects', data, { headers: 
+        return protectedEPClient.post('projects', data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -54,7 +181,7 @@ export default {
         })
     },
     updateProject(id, data) {
-        return apiClient.post('projects/' + id, data, { headers: 
+        return protectedEPClient.post('projects/' + id, data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -63,7 +190,7 @@ export default {
     },
 
     getColumns(projectId) {
-        return apiClient.get('projects/' + projectId + '/columns', {
+        return protectedEPClient.get('projects/' + projectId + '/columns', {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -71,7 +198,7 @@ export default {
         });
     },
     getSingleColumn(id) {
-        return apiClient.get('columns/' + id, {
+        return protectedEPClient.get('columns/' + id, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')                
@@ -79,7 +206,7 @@ export default {
         })
     },
     createColumn(projectId, data) {
-        return apiClient.post('projects/' + projectId +'/columns', data, { headers: 
+        return protectedEPClient.post('projects/' + projectId +'/columns', data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -87,7 +214,7 @@ export default {
         })
     },
     updateColumn(id, data) {
-        return apiClient.post('columns/' + id, data, { headers: 
+        return protectedEPClient.post('columns/' + id, data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -95,7 +222,7 @@ export default {
         })        
     },
     changeColsOrder(projectId, data) {
-        return apiClient.post('projects/' + projectId + '/columns/changeOrder', data, { headers: 
+        return protectedEPClient.post('projects/' + projectId + '/columns/changeOrder', data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -103,7 +230,7 @@ export default {
         })     
     },
     deleteColumn(id) {
-        return apiClient.delete('columns/' + id, {
+        return protectedEPClient.delete('columns/' + id, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')                
@@ -113,7 +240,7 @@ export default {
 
 
     getTasks(columnId) {
-        return apiClient.get('columns/' + columnId + '/tasks', {
+        return protectedEPClient.get('columns/' + columnId + '/tasks', {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -121,7 +248,7 @@ export default {
         });
     },
     getSingleTask(id) {
-        return apiClient.get('tasks/' + id, {
+        return protectedEPClient.get('tasks/' + id, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -129,7 +256,7 @@ export default {
         })
     },
     createTask(columnId, data) {
-        return apiClient.post('columns/' + columnId +'/tasks', data, { headers: 
+        return protectedEPClient.post('columns/' + columnId +'/tasks', data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -137,7 +264,7 @@ export default {
         })
     },
     updateTask(id, data) {
-        return apiClient.post('tasks/' + id, data, { headers: 
+        return protectedEPClient.post('tasks/' + id, data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -145,7 +272,7 @@ export default {
         })        
     },
     relocateTask(id, data) {
-        return apiClient.post('tasks/' + id + '/relocate', data, { headers: 
+        return protectedEPClient.post('tasks/' + id + '/relocate', data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -153,7 +280,7 @@ export default {
         })        
     },
     deleteTask(id) {
-        return apiClient.delete('tasks/' + id, {
+        return protectedEPClient.delete('tasks/' + id, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -163,7 +290,7 @@ export default {
     // Members
     getMembers(projectId) {
         // 'projects/{projectId}/getMembers'
-        return apiClient.get('projects/', projectId, '/getMembers', {
+        return protectedEPClient.get('projects/', projectId, '/getMembers', {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: 'Bearer ' + localStorage.getItem('access_token')
@@ -172,7 +299,7 @@ export default {
     },
     addMember(projectId, data) {
         // 'projects/{projectId}/addMember'
-        return apiClient.post('projects/' + projectId + '/addMember', data, { 
+        return protectedEPClient.post('projects/' + projectId + '/addMember', data, { 
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: 'Bearer ' + localStorage.getItem('access_token')
@@ -180,7 +307,7 @@ export default {
          })
     },
     removeMember(projectId, data) {
-        return apiClient.post('projects/' + projectId + '/removeMember', data, {
+        return protectedEPClient.post('projects/' + projectId + '/removeMember', data, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: 'Bearer ' + localStorage.getItem('access_token')
@@ -189,7 +316,7 @@ export default {
     },
     // Comments
     getComments(taskId) {
-        return apiClient.get('tasks/', taskId, '/comments', {
+        return protectedEPClient.get('tasks/', taskId, '/comments', {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: 'Bearer ' + localStorage.getItem('access_token')
@@ -197,7 +324,7 @@ export default {
         })      
     },
     getSingleComment(id) {
-        return apiClient.get('comments/' + id, {
+        return protectedEPClient.get('comments/' + id, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -205,7 +332,7 @@ export default {
         })
     },
     createComment(taskId, data) {
-        return apiClient.post('tasks/' + taskId +'/comments', data, { headers: 
+        return protectedEPClient.post('tasks/' + taskId +'/comments', data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -213,7 +340,7 @@ export default {
         })    
     },
     updateComment(id, data) {
-        return apiClient.post('comments/' + id, data, { headers: 
+        return protectedEPClient.post('comments/' + id, data, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
@@ -221,7 +348,7 @@ export default {
         })    
     },
     deleteComment(id) {
-        return apiClient.delete('comments/' + id, { headers: 
+        return protectedEPClient.delete('comments/' + id, { headers: 
             {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
