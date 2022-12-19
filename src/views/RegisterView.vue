@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col w-[600px] border border-gray-500 rounded-md my-6 p-4">
+    <form class="flex flex-col w-[600px] border border-gray-500 rounded-md my-6 p-4" @submit.prevent="register">
         <h1 class="self-start text-lg font-bold mb-3">Register</h1>
         <div class="mb-3 flex flex-col w-[400px] self-center">
             <label class="font-bold self-start" for="name">Name</label>
@@ -21,7 +21,6 @@
             <h1 class="text-xs italic mb-3 text-red-500" v-if="err">{{ err }}</h1>
             <button
                 class="px-2 py-1 w-[150px] text-sm rounded-lg bg-blue-300 hover:bg-blue-500 hover:text-white"
-                @click="register"
                 >
                 Register
             </button>
@@ -30,7 +29,7 @@
         <h1 class="">
             Already have an account? <router-link class="underline" :to="{name: 'LoginView', query: { to: this.$route.query.to ?? null }}">Login</router-link> instead.
         </h1>
-    </div>
+    </form>
 </template>
 <script setup>
 import ProjectService from '@/services/ProjectService'
