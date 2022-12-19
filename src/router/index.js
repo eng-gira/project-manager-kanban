@@ -6,6 +6,7 @@ import AuthLayout from '../views/AuthLayout.vue'
 import SidebarLayout from '../views/SidebarLayout.vue'
 import ProjectView from '../views/ProjectView.vue'
 import TaskModal from '../views/TaskModal.vue'
+import ErrorDisplayView from '../views/ErrorDisplayView.vue'
 
 const routes = [
   {
@@ -68,6 +69,15 @@ const routes = [
         ]
       },
     ]
+  },
+  {
+    path: '/error/:status',
+    name: 'ErrorDisplayView',
+    component: ErrorDisplayView,
+  },
+  {
+    path: '/:catchAll(.*)',
+    redirect: { name: 'ErrorDisplayView', params: { status: '404' } }
   },
   {
     path: '/about',

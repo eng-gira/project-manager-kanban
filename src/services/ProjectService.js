@@ -76,72 +76,19 @@ protectedEPClient.interceptors.request.use(async function (config) {
     return Promise.reject('REQUEST ERROR: ' + error);
 });
 
-// let refreshingInAction = false
-// protectedEPClient.interceptors.response.use(function (response) {
-//     // Any status code that lie within the range of 2xx cause this function to trigger
-//     // Do something with response data
-//     // console.log('successful - response:', response)
-//     // console.log('successful - response.config.url:', response.config.url)
-//     // console.log('router.currentRoute', router.currentRoute)
-//     // console.log('curr path', router.currentRoute.value.fullPath)
+protectedEPClient.interceptors.response.use(function (response) {
 
-//     if(refreshingInAction) return
+    return response;
+  }, function (error) {
+    // Do something with response error
+    console.log('error:', error)
+    console.log('error.response:', error.response)
+    console.log('error.response.status:', error.response.status)
+    console.log('error.response.message:', error.response.message)
 
-//     return response;
-//   }, function (error) {
-//     if(refreshingInAction) return
-
-//     // Any status codes that falls outside the range of 2xx cause this function to trigger
-//     // Do something with response error
-//     console.log('error:', error)
-//     console.log('error.response.status:', error.response.status)
-//     console.log('error - response.config.url:', error.response.config.url)
-
-//     if(error.response.status == 401) {
-//         if(!refreshingInAction) {
-//             // if only one
-//             if(hasExpired(localStorage.getItem('access_token'))) {
-//                 console.log('access_token expired here...')
-
-//                 if(hasExpired(localStorage.getItem('refresh_token'))) {
-//                     console.log('refresh token expired too!!')
-    
-//                     localStorage.removeItem('access_token')
-//                     localStorage.removeItem('refresh_token')
-//                     router.push({ name: 'RegisterView'  })
-//                     return 
-//                 }
-
-//                 refreshingInAction = true
-//                 // Refresh: request a new access token
-//                 refreshClient.post('', {}, {
-//                     headers: {
-//                         'Content-Type': 'application/json',
-//                         'Authorization': 'Bearer ' + localStorage.getItem('refresh_token')      
-//                     }
-//                 }).then((resp) => {
-//                     console.log('resp.status:', resp.status)
-//                     if(resp.data.access_token) {
-//                         localStorage.setItem('access_token', resp.data.access_token)
-//                         router.push(router.currentRoute.value.fullPath)
-//                     }
-//                 }).finally(() => {
-//                     refreshingInAction = false
-//                 })
-//             }
-//             else 
-//             {
-//                 console.log('neither expired.')
-//                 router.push({ name: 'RegisterView'  })
-//             }
-//         } else {
-//             console.log('the else block. Refreshing in action..')
-//             return
-//         }
-//     }
-
-//     return Promise.reject(error);
-// })
+    router.push({name: 'ErrorDisplayView', params: { status: error.response.status }})
+    return Promise.reject(error);
+})
 
 export default {
     register(data) {
