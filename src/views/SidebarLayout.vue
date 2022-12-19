@@ -4,8 +4,8 @@
         <!-- bg-blue-100  -->
         <div class="flex flex-col self-start h-screen overflow-y-auto w-[320px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
             <div class="flex flex-col mt-6 text-sm px-4">
-                <h1 class="font-bold mb-3 self-start">Projects</h1>
-                <div v-if="projects.length < 1" class="italic mb-3">Loading...</div>
+                <h1 class="font-bold mb-6 self-start">Projects</h1>
+                <div v-if="!projects" class="italic mb-3">Loading...</div>
                 <router-link
                     v-else
                     v-for="(project, projectIndex) in projects"
@@ -30,6 +30,7 @@
                     </button>
                     <div v-else>
                         <input
+                            ref="newProjectNameField"
                             type="text"
                             placeholder="Project Name..."
                             @keyup.enter="createProject($event)"
@@ -40,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div class="text-xs flex flex-col mt-6 mb-6 px-4" v-if="archivedProjects.length > 0">
+            <div class="text-xs flex flex-col mt-6 mb-6 px-4" v-if="archivedProjects && archivedProjects.length > 0">
                 <h1 class="font-bold uppercase mb-3">Archived Projects</h1>
                 <router-link
                     v-for="(archivedProject, archivedProjectIndex) in archivedProjects"
@@ -69,20 +70,20 @@
 </template>
 <script setup>
 import ProjectService from '@/services/ProjectService';
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 
 
-let archivedProjects = ref([])
+let archivedProjects = ref(null)
 const route = useRoute()
 const router = useRouter()
 
-let projects = ref([])
+let projects = ref(null)
 
 onMounted(() => {
     ProjectService.getProjects().then((resp) => {
         projects.value = resp.data.data
-        // console.log(projects.value)
+        console.log(projects.value)
     })
 
     ProjectService.getArchivedProjects().then((resp) => {
@@ -122,10 +123,14 @@ const logout = () => {
 let creatingProject = ref(false)
 let createProjectStatusMessage = ref('')
 let errorInCreateProject = ref(false)
+let newProjectNameField = ref(null)
 const startCreatingProject = () => {
     creatingProject.value = true
     errorInCreateProject.value = false
     createProjectStatusMessage.value = ''
+    nextTick(() => {
+        newProjectNameField.value.focus()
+    })
 }
 const closeProjectCreate = () => {
     creatingProject.value = false

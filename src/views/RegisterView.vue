@@ -21,8 +21,10 @@
             <h1 class="text-xs italic mb-3 text-red-500" v-if="err">{{ err }}</h1>
             <button
                 class="px-2 py-1 w-[150px] text-sm rounded-lg bg-blue-300 hover:bg-blue-500 hover:text-white"
+                :class="{'bg-blue-300 hover:bg-blue-500 hover:text-white': !formLoading, 'bg-gray-300 cursor-none': formLoading}"
+                :disabled="formLoading"
                 >
-                Register
+                {{ formLoading ? 'Loading...' : 'Register' }}
             </button>
         </div>
         
@@ -43,6 +45,7 @@ let name = ref('')
 let email = ref('')
 let password = ref('')
 let err = ref('')
+let formLoading = ref(false)
 
 function register() {
     if(name.value.length < 1 || email.value.length < 1 || password.value.length < 1)
@@ -50,6 +53,8 @@ function register() {
         err.value = 'Please fill all of the required fields'
         return false
     }
+
+    formLoading.value = true
 
     ProjectService.register(JSON.stringify({ name: name.value, email: email.value, password: password.value })).then((resp) => {
         if(resp.data.message == 'failed') {
@@ -59,15 +64,18 @@ function register() {
             console.log(resp.data.access_token)
             localStorage.setItem('access_token', resp.data.access_token)
             localStorage.setItem('refresh_token', resp.data.refresh_token)
+
+            if(route.query.to)
+            {
+                router.push(route.query.to)
+            }
+            else {
+                router.push({ name: 'HomeView' })
+            }
         }
-        if(route.query.to)
-        {
-            router.push(route.query.to)
-        }
-        else {
-            router.push({ name: 'HomeView' })
-        }
-    });
+    }).finally(() => {
+        formLoading.value = false
+    })
 
     // localStorage.setItem('auth', 'no specific val required')
 }

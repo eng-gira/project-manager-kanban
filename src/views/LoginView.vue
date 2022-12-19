@@ -14,9 +14,11 @@
         <div class="mb-3 flex flex-col self-center items-center">
             <h1 class="text-xs italic mb-3 text-red-500" v-if="err"> {{ err }}</h1>
             <button
-                class="px-2 py-1 w-[150px] text-sm rounded-lg bg-blue-300 hover:bg-blue-500 hover:text-white"
+                class="px-2 py-1 w-[150px] text-sm rounded-lg"
+                :class="{'bg-blue-300 hover:bg-blue-500 hover:text-white': !formLoading, 'bg-gray-300 cursor-none': formLoading}"
+                :disabled="formLoading"
                 >
-                Login
+                {{ formLoading ? 'Loading...' : 'Login' }}
             </button>
         </div>
         
@@ -27,7 +29,7 @@
 </template>
 <script setup>
 import ProjectService from '@/services/ProjectService'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -35,15 +37,7 @@ const route = useRoute()
 let email = ref('')
 let password = ref('')
 let err = ref('')
-
-/**
- * For debugging purposes; delete after finishing
- */
-onMounted(() => {
-    if(route.query.dd) {
-        console.log(JSON.parse(route.query.dd))
-    }
-})
+let formLoading = ref(false)
 
 function login() {
     if(email.value.length < 1 || password.value.length < 1)
@@ -51,6 +45,8 @@ function login() {
         err.value = 'Please fill all of the required fields'
         return false
     }
+
+    formLoading.value = true
 
     ProjectService.login(JSON.stringify({ email: email.value, password: password.value })).then((resp) => {
         if(resp.data.message == 'failed') {
@@ -72,8 +68,9 @@ function login() {
         
     }).catch((err) => {
         err.value = err
-    });
-
+    }).finally(() => {
+        formLoading.value = false
+    })
 }
 
 </script>

@@ -398,7 +398,6 @@ const placeColumn = (toColOfId, toColIndex, event) => {
     
     if(fromColIndex==toColIndex) { return }
 
-    // UI Update
     const colToMove = project.value.columns.splice(fromColIndex, 1)[0]
     project.value.columns.splice(toColIndex, 0, colToMove)
 
@@ -421,7 +420,6 @@ const placeColumn = (toColOfId, toColIndex, event) => {
         console.log('failed:', resp.data)
     });
 
-    // Backend Upate
     // This section is to determine the columns that were forced to move, and the positions where they were moved.
     if(Math.abs(fromColIndex - toColIndex) <= 1) {
         let indexCounter = 0
@@ -591,9 +589,6 @@ const removeTeamMember = (memberEmail, memberIndex) => {
             closeTeamMemberRemovalConfirmation()
         }
     })
-
-
-    // Send to the backend...
 }
 
 let updatedProjectName = ref('')

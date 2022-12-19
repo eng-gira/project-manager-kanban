@@ -670,6 +670,10 @@ video {
   cursor: pointer;
 }
 
+.cursor-none {
+  cursor: none;
+}
+
 .resize-none {
   resize: none;
 }
