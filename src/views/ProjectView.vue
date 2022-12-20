@@ -78,7 +78,7 @@
                             <div 
                                 class="w-full shadow mb-2 py-2 px-2 rounded bg-white text-gray-900 no-underline cursor-pointer"
                                 v-for="(task, taskIndex) in column.tasks" :key="task.id"
-                                @click="openTask(task.id)"
+                                @click="openTask(task.id, taskIndex, columnIndex)"
                                 draggable="true"
                                 @dragstart="pickupTask(task.id, column.id, columnIndex, taskIndex, $event)"
         
@@ -190,7 +190,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="flex justify-between mt-3" v-if="isProjectAdmin">
+                <form  @submit.prevent="addMember" class="flex justify-between mt-3" v-if="isProjectAdmin">
                     <input
                         type="text"
                         class="p-2 mr-2 text-xs flex-grow bg-transparent border border-black rounded-md h-[28px]"
@@ -199,11 +199,10 @@
                         />
                     <button
                         class="rounded-lg px-2 py-1 text-xs bg-blue-300 hover:bg-blue-500 hover:text-white"
-                        @click="addMember"
                         >
                         Add
                     </button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -255,9 +254,10 @@ let isTaskOpen = computed(() => {
 
 let isModalOpen = ref(false)
 
-const openTask = (taskId) => {
+const openTask = (taskId, taskIndex, columnIndex) => {
     isModalOpen.value = true
-    router.push({ name: 'TaskModal', params: { projectId: project.value.id, id: taskId } })
+    router.push({ name: 'TaskModal', params: { projectId: project.value.id, id: taskId, taskIndex: parseInt(taskIndex), 
+        columnIndex: parseInt(columnIndex) } })
 }
 const closeTask = (taskId, taskIndexInCol, colIndexInProj, e) => {
     refreshTask(taskId, taskIndexInCol, colIndexInProj, e)

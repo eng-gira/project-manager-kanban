@@ -654,6 +654,10 @@ video {
   width: 220px;
 }
 
+.w-\[360px\] {
+  width: 360px;
+}
+
 .min-w-\[300px\] {
   min-width: 300px;
 }
@@ -957,6 +961,11 @@ video {
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
+}
+
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 .text-left {

@@ -124,13 +124,13 @@ import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
 
 const props = defineProps({
-    id: [String, Number]
+    id: [String, Number],
+    taskIndex: [String, Number],
+    columnIndex: [String, Number],
 })
 const emit = defineEmits(['close-task', 'task-deleted'])
 
 let task = ref(null)
-let taskIndexInCol = ref(-1)
-let colIndexInProj = ref(-1)
 let assigneeId = ref(null)
 let members = ref([])
 const route = useRoute()
@@ -138,6 +138,8 @@ let authUser = ref(null)
 const attachments = ref(null)
 
 onMounted(() => {
+    console.log(props.columnIndex)
+    
     ProjectService.getSingleTask(props.id).then((resp) => {
         if(resp.data.message == 'failed') {
             console.log('failed:', resp.data.data)
@@ -153,18 +155,6 @@ onMounted(() => {
         if (resp.data.message != 'failed')
         { 
             members.value = resp.data.data.members
-            const cols = resp.data.data.columns
-            for(let i = 0; i < cols.length; i++) {
-                if(cols[i].id == task.value.column_id) {
-                    colIndexInProj.value = i
-
-                    for(let j = 0; j < cols[i].tasks.length; j++) {
-                        if(cols[i].tasks[j].id == task.value.id) {
-                            taskIndexInCol.value = j
-                        }
-                    }
-                }
-            }
         }
     }).catch((resp) => {
         console.log('failed to get single project:', resp.data)
@@ -255,7 +245,7 @@ const deleteTask = () => {
 
 const emitCloseTask = (e = null) => {
     if(waitingForBE.value === false)
-        emit('close-task', task.value.id, taskIndexInCol.value, colIndexInProj.value, e)
+        emit('close-task', task.value.id, props.taskIndex, props.columnIndex, e)
 }
 
 let commentBody = ref('')

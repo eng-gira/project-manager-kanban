@@ -60,7 +60,7 @@ const routes = [
         meta: { requiresAuth: true },
         children: [
           {
-            path: 'task/:id/',
+            path: 'task/:id/:taskIndex/:columnIndex',
             name: 'TaskModal',
             meta: { requiresAuth: true },
             component: TaskModal,
