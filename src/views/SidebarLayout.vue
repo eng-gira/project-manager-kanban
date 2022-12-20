@@ -84,6 +84,8 @@ onMounted(() => {
     ProjectService.getProjects().then((resp) => {
         projects.value = resp.data.data
         console.log(projects.value)
+    }).catch(() => {
+        console.log('failed to get all projects')
     })
 
     ProjectService.getArchivedProjects().then((resp) => {
@@ -94,6 +96,8 @@ onMounted(() => {
 
 
 let selectedProjectId = computed(() => {
+    if(!projects.value) return -1
+
     if(route.params.projectId)
     {
         for(let i = 0; i < projects.value.length; i++) {

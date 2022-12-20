@@ -89,7 +89,7 @@
                         class="bg-slate-200 rounded-lg flex flex-col space-y-3 mt-3 p-2"
                         >
                         <div class="flex justify-between">
-                            <h1 class="font-bold">{{ comment.author_id }}</h1>
+                            <h1 class="font-bold">{{ memberIdNameMapper[comment.author_id] }}</h1>
 
                             <!-- Controls -->
                             <div v-if="comment.author_id == authUser.id">
@@ -99,17 +99,17 @@
                                     Edit
                                 </button>
                                 <div v-else>
-                                    <button class="text-xs bg-blue-300 hover:bg-blue-500 px-2 py-1 rounded-lg" @click="updateComment(comment.id, commentIndex)">Save</button>
+                                    <button class="text-xs bg-blue-300 hover:bg-blue-500 px-2 py-1 rounded-lg mr-3" @click="updateComment(comment.id, commentIndex)">Save</button>
                                     <button class="text-xs bg-gray-300 hover:bg-gray-500 px-2 py-1 rounded-lg" @click="stopEditingComment">Cancel</button>
                                 </div>
 
-                                <button @mousedown="deleteComment(comment.id, commentIndex)" class="text-xs hover:underline font-bold">
+                                <button v-if="editingCommentOfId != comment.id" @mousedown="deleteComment(comment.id, commentIndex)" class="text-xs hover:underline font-bold">
                                     Delete
                                 </button>
                             </div>
                         </div>
                         <div v-if="editingCommentOfId != comment.id">{{ comment.body }}</div>
-                        <textarea v-else placeholder="{{comment.body}}" v-model="commentBodyBeingEdited[comment.id]"/>
+                        <textarea v-else placeholder="{{comment.body}}" class="bg-transparent border border-black p-2" v-model="commentBodyBeingEdited[comment.id]"/>
                     </div>
                     <h1 class="italic mx-auto mt-3" v-if="task.comments.length < 1">No Comments Yet</h1>
                 </div>
@@ -118,7 +118,7 @@
     </div>
 </template>
 <script setup>
-import { onMounted, ref, defineEmits } from 'vue';
+import { onMounted, ref, defineEmits, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
@@ -136,7 +136,7 @@ let members = ref([])
 const route = useRoute()
 let authUser = ref(null)
 const attachments = ref(null)
-
+let memberIdNameMapper = ref({})
 onMounted(() => {
     console.log(props.columnIndex)
     
@@ -151,13 +151,16 @@ onMounted(() => {
         console.log('failed:', resp.data)
     })
 
-    ProjectService.getSingleProject(route.params.projectId).then((resp) => {
+    ProjectService.getMembers(route.params.projectId).then((resp) => {
         if (resp.data.message != 'failed')
         { 
-            members.value = resp.data.data.members
+            members.value = resp.data.data
+            for(let i = 0; i < members.value.length; i++) {
+                memberIdNameMapper.value[members.value[i].user_id] = members.value[i].user_name
+            }       
         }
     }).catch((resp) => {
-        console.log('failed to get single project:', resp.data)
+        console.log('failed to get members:', resp)
     })
 
     // Get the user data from token
@@ -328,5 +331,4 @@ const assignNewUser = () => {
     })
     closeConfirmationOfNewUserAssignment()
 }
-
 </script>

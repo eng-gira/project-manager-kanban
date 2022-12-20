@@ -12,6 +12,7 @@
                             @focusout="stopEditingProjectName"
                             @keyup.enter="updateProjectName"
                             @keyup.esc="stopEditingProjectName"
+                            ref="projectNameRef"
                             />
                         <button
                             v-if="!editingProjectName"
@@ -208,7 +209,7 @@
     </div>
 </template>
 <script setup>
-import { computed, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
+import { computed, nextTick, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
@@ -234,6 +235,8 @@ onMounted(() => {
         ProjectService.getSingleProject(parseInt(props.projectId)).then((resp) => {
             project.value = resp.data.data
             console.log(resp.data)
+        }).catch(() => {
+            console.log('failed to proj of id:', props.projectId)
         })
         // console.log('project', project.value, 'since projectId was', props.projectId)
     })
@@ -593,12 +596,16 @@ const removeTeamMember = (memberEmail, memberIndex) => {
 
 let updatedProjectName = ref('')
 let editingProjectName = ref(false)
-
+let projectNameRef = ref(null)
 const stopEditingProjectName = () => {
     editingProjectName.value = false
 }
 const startEditingProjectName = () => {
     editingProjectName.value = true
+    updatedProjectName.value = project.value.name
+    nextTick(() => {
+        projectNameRef.value.focus()
+    })
 }
 const updateProjectName = () => {
     let oldProjectName = project.value.name
