@@ -5,4 +5,11 @@ import store from './store'
 
 import "./assets/main.css";
 
-createApp(App).use(store).use(router).mount('#app')
+
+import { OhVueIcon, addIcons } from "oh-vue-icons";
+import { MdEdit, IoRemoveCircleSharp, IoAddOutline} from "oh-vue-icons/icons";
+
+addIcons(MdEdit, IoRemoveCircleSharp, IoAddOutline);
+
+
+createApp(App).use(store).use(router).component("v-icon", OhVueIcon).mount('#app')

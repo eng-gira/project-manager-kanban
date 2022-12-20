@@ -21,13 +21,14 @@
 
                 <div class="text-sm">
                     <h1 class="italic text-xs" :class="{'text-red-500': errorInCreateProject}" v-if="createProjectStatusMessage"> {{ createProjectStatusMessage }} </h1>
-                    <button
+                    <div
                         v-if="!creatingProject"
-                        class="bg-[#F4F4F4] hover:underline w-[220px] h-[45px] rounded-md"
+                        class="bg-[#F4F4F4] hover:underline w-[220px] h-[45px] rounded-md flex items-center space-x-3 px-4 cursor-pointer"
                         @click="startCreatingProject"
                         >
-                        New Project...
-                    </button>
+                        <v-icon class="justify-self-start" name="io-add-outline" />
+                        <h1 class="justify-self-center">New Project</h1>
+                    </div>
                     <div v-else>
                         <input
                             ref="newProjectNameField"

@@ -14,12 +14,14 @@
                             @keyup.esc="stopEditingProjectName"
                             ref="projectNameRef"
                             />
-                        <button
+                        
+                        <v-icon
+                            name="md-edit" 
                             v-if="!editingProjectName"
-                            class="text-xs ml-3"
+                            class="cursor-pointer ml-3"
                             @click="startEditingProjectName"
-                            >(E)
-                        </button>
+                        />
+
                         <div class="rounded-md py-1 px-2 text-sm bg-[#EAEAEA] cursor-pointer ml-6" @click="openTeamModal">Team</div>
                     </div>
                     <div v-if="isProjectAdmin">
@@ -45,7 +47,7 @@
                 <div v-if="project" class="flex items-start">
                     <!-- Column Class Styles -->
                     <div
-                        class="p-3 mr-4 text-left shadow rounded bg-[#D9D9D9] min-w-[300px] w-[300px] flex flex-col"
+                        class="p-3 mr-4 text-left shadow rounded bg-[#D9D9D9] min-w-[300px] flex flex-col"
                         v-for="(column, columnIndex) in project.columns"
                         :key="column.name"
               
@@ -70,8 +72,19 @@
                                 {{ column.name}}
                             </h1>
                             <div class="">
-                                <button class="mr-2" @click="enableEditingColName(column.id)" :disabled="isModalOpen">E</button>
-                                <button @click="openColDeletionConfirmationModal(column.id, columnIndex)" :disabled="isModalOpen">D</button>
+                                <v-icon
+                                    name="md-edit"
+                                    class="mr-2 cursor-pointer"
+                                    @click="enableEditingColName(column.id)"
+                                    :disabled="isModalOpen"
+                                    />
+                                
+                                <v-icon
+                                    name="io-remove-circle-sharp"
+                                    class="cursor-pointer"
+                                    @click="openColDeletionConfirmationModal(column.id, columnIndex)"
+                                    :disabled="isModalOpen"
+                                    />
                             </div>
                         </div>
                         <div class="list-reset">
@@ -182,13 +195,12 @@
                                 Cancel
                             </button>
                         </div>
-                        <button
+                        <v-icon
                             v-else
-                            class="py-1 px-2 text-xs rounded-lg bg-yellow-300 hover:bg-yellow-500"
+                            name="io-remove-circle-sharp"
+                            class="cursor-pointer"
                             @click="askToConfirmTeamMemberRemoval(member.id, memberIndex)"
-                            >
-                            Remove Member
-                        </button>
+                            />
                     </div>
                 </div>
                 <form  @submit.prevent="addMember" class="flex justify-between mt-3" v-if="isProjectAdmin">
