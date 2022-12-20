@@ -156,7 +156,7 @@ onMounted(() => {
         { 
             members.value = resp.data.data
             for(let i = 0; i < members.value.length; i++) {
-                memberIdNameMapper.value[members.value[i].user_id] = members.value[i].user_name
+                memberIdNameMapper.value[members.value[i].user_id] = members.value[i].user_data.name
             }       
         }
     }).catch((resp) => {
