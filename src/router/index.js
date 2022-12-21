@@ -26,7 +26,7 @@ const routes = [
         component: RegisterView,
         beforeEnter: () => {
           localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
+          
         }
       },
       {
@@ -35,7 +35,7 @@ const routes = [
         component: LoginView,
         beforeEnter: () => {
           localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
+          
         }
       },
      ]

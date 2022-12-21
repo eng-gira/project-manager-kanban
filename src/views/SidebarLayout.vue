@@ -120,7 +120,6 @@ let selectedProjectId = computed(() => {
 
 const logout = () => {
     // Do not need BE confirmation to log out.
-    localStorage.removeItem('refresh_token')
     localStorage.removeItem('access_token')
     router.push({ name: 'LoginView' })
 }

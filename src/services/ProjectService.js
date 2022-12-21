@@ -36,8 +36,7 @@ protectedEPClient.interceptors.request.use(async function (config) {
             let resp = await refreshClient.post('', {}, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('refresh_token'),
-                    'ExpTok': localStorage.getItem('access_token')
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
                 }
             })
             // console.log('refresh token request resp:', resp.status)
@@ -51,8 +50,6 @@ protectedEPClient.interceptors.request.use(async function (config) {
             {
                 console.log('no access token refreshed, must login also, resp:', resp)
                 localStorage.removeItem('access_token')
-                localStorage.removeItem('refresh_token')
-
                 
                 window.location = '/auth/login'
                 return Promise.reject();
@@ -61,7 +58,6 @@ protectedEPClient.interceptors.request.use(async function (config) {
         catch(e) {
             console.log('error at refreshing...')
             localStorage.removeItem('access_token')
-            localStorage.removeItem('refresh_token')
 
             window.location = '/auth/login'
 

@@ -63,7 +63,6 @@ function register() {
         else {
             console.log(resp.data.access_token)
             localStorage.setItem('access_token', resp.data.access_token)
-            localStorage.setItem('refresh_token', resp.data.refresh_token)
 
             if(route.query.to)
             {
