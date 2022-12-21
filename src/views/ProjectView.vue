@@ -17,14 +17,14 @@
                         
                         <v-icon
                             name="md-edit" 
-                            v-if="isProjectAdmin && !editingProjectName"
+                            v-if="isProjectAdmin(project.admin_id) && !editingProjectName"
                             class="cursor-pointer ml-3 lg:w-[20px] w-[15px]"
                             @click="startEditingProjectName"
                         />
 
                         <div class="rounded-md py-1 px-2 text-xs lg:text-sm bg-[#EAEAEA] cursor-pointer ml-6" @click="openTeamModal">Team</div>
                     </div>
-                    <div v-if="isProjectAdmin">
+                    <div v-if="isProjectAdmin(project.admin_id)">
                         <button
                             v-if="project.archived == 0"
                             class="bg-red-300 hover:bg-red-500 hover:text-white text-xs lg:text-sm px-2 py-1 rounded-lg ml-8"
@@ -180,7 +180,7 @@
                 <h1 class="font-bold lg:text-lg mb-6">Team Members</h1>
                 <div v-for="(member, memberIndex) in project.members" :key="member.id" class="flex justify-between mb-3">
                     <h1 class="lg:text-md text-sm">{{ member.user_email }}</h1>
-                    <div v-if="isProjectAdmin && member.user_id != project.admin_id">
+                    <div v-if="isProjectAdmin(project.admin_id) && member.user_id != project.admin_id">
                         <div
                             v-if="confirmingTeamMemberRemoval === true && confirmingRemovalOfTeamMemberOfIndex == memberIndex"
                             >
@@ -205,7 +205,7 @@
                             />
                     </div>
                 </div>
-                <form  @submit.prevent="addMember" class="flex justify-between mt-3" v-if="isProjectAdmin">
+                <form  @submit.prevent="addMember" class="flex justify-between mt-3" v-if="isProjectAdmin(project.admin_id)">
                     <input
                         type="text"
                         class="p-2 mr-2 text-xs flex-grow bg-transparent border border-black rounded-md h-[28px]"
@@ -227,7 +227,7 @@ import { computed, nextTick, onBeforeMount, onMounted, ref, watchEffect } from '
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
-import { expiryData, hasExpired } from '@/utils';
+import { expiryData, hasExpired, isProjectAdmin } from '@/utils';
 import { useServices } from '@/components/services.js'
 
 const props = defineProps({
@@ -248,20 +248,10 @@ onMounted(() => {
     expiryData(localStorage.getItem('access_token'))
     console.log(hasExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
 })
-
-let isProjectAdmin = computed(() => {
-    const token = localStorage.getItem('access_token')
-    let decoded = jwt_decode(token)
-
-    return project.value == null ? false : (decoded.user.id == project.value.admin_id)
-})
-
 let isTaskOpen = computed(() => {
     return route.name === 'TaskModal'
 })
-
 let isModalOpen = ref(false)
-
 const openTask = (taskId, taskIndex, columnIndex) => {
     isModalOpen.value = true
     router.push({ name: 'TaskModal', params: { projectId: project.value.id, id: taskId, taskIndex: parseInt(taskIndex), 

@@ -1,7 +1,10 @@
 import jwt_decode from "jwt-decode"
 
-export function uuid () {
-  return Math.random().toString(16).slice(2)
+export function isProjectAdmin (adminId) {
+  const token = localStorage.getItem('access_token')
+  let decoded = jwt_decode(token)
+
+  return decoded.user.id == adminId
 }
 
 export function hasExpired(token) {
