@@ -2,7 +2,7 @@
     <div class="flex">
         <!-- Sidebar -->
         <!-- bg-blue-100  -->
-        <div class="flex flex-col self-start h-screen overflow-y-auto w-[360px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
+        <div class="hidden lg:block flex flex-col self-start h-screen overflow-y-auto w-[360px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
             <div class="flex flex-col items-center mt-6 text-sm px-4">
                 <h1 class="font-bold mb-6 self-start">Projects</h1>
                 <div v-if="!projects" class="italic mb-3">Loading...</div>

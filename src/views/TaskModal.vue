@@ -1,6 +1,6 @@
 <template>
     <div @click.self="emitCloseTask">
-        <div class="flex bg-white pin mx-auto mt-3 lg:py-4 lg:px-6 py-2 px-3 text-left rounded w-[300px] lg:max-w-[700px] overflow-y-auto max-h-[500px]" v-if="task">
+        <div class="flex bg-white pin mx-auto mt-3 lg:py-4 lg:px-6 py-2 px-3 text-left rounded w-[300px] lg:w-[700px] overflow-y-auto" v-if="task">
             <div class="flex flex-col flex-grow justify-between items-start w-full">
                 <div class="flex justify-between w-full">
                     <input

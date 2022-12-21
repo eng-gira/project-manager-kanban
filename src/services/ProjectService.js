@@ -72,19 +72,19 @@ protectedEPClient.interceptors.request.use(async function (config) {
     return Promise.reject('REQUEST ERROR: ' + error);
 });
 
-// protectedEPClient.interceptors.response.use(function (response) {
+protectedEPClient.interceptors.response.use(function (response) {
 
-//     return response;
-//   }, function (error) {
-//     // Do something with response error
-//     console.log('error:', error)
-//     console.log('error.response:', error.response)
-//     console.log('error.response.status:', error.response.status)
-//     console.log('error.response.message:', error.response.message)
+    return response;
+  }, function (error) {
+    // Do something with response error
+    console.log('error:', error)
+    console.log('error.response:', error.response)
+    console.log('error.response.status:', error.response.status)
+    console.log('error.response.message:', error.response.message)
 
-//     router.push({name: 'ErrorDisplayView', params: { status: error.response.status }})
-//     return Promise.reject(error);
-// })
+    router.push({name: 'ErrorDisplayView', params: { status: error.response.status }})
+    return Promise.reject(error);
+})
 
 export default {
     register(data) {

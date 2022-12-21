@@ -2,12 +2,12 @@
     <div class="h-screen w-screen p-4 bg-[#F5F5F5] overflow-auto">
         <div class="flex flex-col ml-6" v-if="project">
             <div class="flex space-x-8 items-center mb-6">
-                <div class="w-full flex justify-between items-center"> <!-- space-x-3 -->
+                <!-- <div class="w-full flex justify-start items-center"> space-x-3 -->
                     <div class="flex items-center">
-                        <h1 v-if="!editingProjectName" class="font-bold text-xl">{{ project.name }}</h1>
+                        <h1 v-if="!editingProjectName" class="font-bold text-sm lg:text-xl">{{ project.name }}</h1>
                         <input
                             v-else
-                            class="p-2 text-xl bg-transparent h-[28px] rounded-md border border-black"
+                            class="p-2 text-sm lg:text-xl bg-transparent h-[28px] rounded-md border border-black"
                             v-model="updatedProjectName"
                             @focusout="stopEditingProjectName"
                             @keyup.enter="updateProjectName"
@@ -18,36 +18,36 @@
                         <v-icon
                             name="md-edit" 
                             v-if="!editingProjectName"
-                            class="cursor-pointer ml-3"
+                            class="cursor-pointer ml-3 lg:w-[20px] w-[15px]"
                             @click="startEditingProjectName"
                         />
 
-                        <div class="rounded-md py-1 px-2 text-sm bg-[#EAEAEA] cursor-pointer ml-6" @click="openTeamModal">Team</div>
+                        <div class="rounded-md py-1 px-2 text-xs lg:text-sm bg-[#EAEAEA] cursor-pointer ml-6" @click="openTeamModal">Team</div>
                     </div>
                     <div v-if="isProjectAdmin">
                         <button
                             v-if="project.archived == 0"
-                            class="bg-red-300 hover:bg-red-500 hover:text-white text-sm px-2 py-1 rounded-lg"
+                            class="bg-red-300 hover:bg-red-500 hover:text-white text-xs lg:text-sm px-2 py-1 rounded-lg ml-8"
                             @click="addToArchive"
                             >
                             Archive
                         </button>
                         <button
                             v-else
-                            class="bg-gray-300 hover:bg-gray-500 hover:text-white text-sm px-2 py-1 rounded-lg"
+                            class="bg-gray-300 hover:bg-gray-500 hover:text-white text-xs lg:text-sm px-2 py-1 rounded-lg ml-8"
                             @click="unarchive"
                             >
                             Unarchive
                         </button>
                     </div>
-                </div>
+                <!-- </div> -->
             </div>
             <!-- Project Class Styles -->
             <div class="">
                 <div v-if="project" class="flex items-start">
                     <!-- Column Class Styles -->
                     <div
-                        class="p-3 mr-4 text-left shadow rounded bg-[#D9D9D9] min-w-[300px] flex flex-col"
+                        class="p-3 mr-4 text-left shadow rounded bg-[#D9D9D9] min-w-[200px] lg:w-[300px] flex flex-col"
                         v-for="(column, columnIndex) in project.columns"
                         :key="column.name"
               
@@ -59,29 +59,31 @@
                         @dragstart.self="pickupColumn(column.id, columnIndex, $event)"
                         >
         
-                        <div class="flex items-center mb-2 font-bold justify-between">
+                        <div class="flex items-center mb-2 font-bold justify-between w-full">
                             <input
                                 v-if="editingColName===true && editingColOfId == column.id"
                                 type="text"
                                 :value="column.name"
-                                class="p-2 mr-2 flex-grow bg-transparent border border-black rounded-md h-[28px]"
+                                class="p-2 mr-2 w-[50px] lg:w-[100px] flex-grow bg-transparent border border-black rounded-md h-[28px] lg:text-md text-sm"
                                 @change="updateColName(column.id, columnIndex, $event)"
                                 @keyup.esc="disableEditingColName(columnIndex, $event)"
+                                @focusout="disableEditingColName(columnIndex, $event)"
+                                :id="'colNameField_' + column.id"
                                 />
-                            <h1 v-else>
+                            <h1 v-else class="lg:text-md text-sm">
                                 {{ column.name}}
                             </h1>
                             <div class="">
                                 <v-icon
                                     name="md-edit"
-                                    class="mr-2 cursor-pointer"
+                                    class="mr-2 cursor-pointer lg:w-[20px] w-[15px]"
                                     @click="enableEditingColName(column.id)"
                                     :disabled="isModalOpen"
                                     />
                                 
                                 <v-icon
                                     name="io-remove-circle-sharp"
-                                    class="cursor-pointer"
+                                    class="cursor-pointer lg:w-[20px] w-[15px]"
                                     @click="openColDeletionConfirmationModal(column.id, columnIndex)"
                                     :disabled="isModalOpen"
                                     />
@@ -101,12 +103,12 @@
                                 @dragenter.prevent
                                 >
                                 <div class="flex-col">
-                                    <div class="flex justify-between"> 
-                                        <span class="font-bold">{{ task.name + '(' + task.id + ')' }}</span>
+                                    <div class="lg:text-md text-sm flex justify-between"> 
+                                        <span class="font-bold">{{ task.name }}</span>
                                     </div>
                                     <p 
                                         v-if="task.description"
-                                        class="w-full flex-no-shrink text-sm mt-1">
+                                        class="w-full flex-no-shrink text-xs lg:text-sm mt-1">
                                         {{ task.description }}
                                     </p>
                                 </div>
@@ -114,7 +116,7 @@
         
                             <input
                                 type="text"
-                                class="p-2 block w-full bg-transparent h-[28px]"
+                                class="p-2 block w-full bg-transparent h-[28px] lg:text-md text-sm"
                                 placeholder="Add a task..."
                                 @keyup.enter="addTask($event, column.id, columnIndex)"
                                 @keyup.esc="$event.target.value = ''"
@@ -124,7 +126,7 @@
                     </div>
                     
                     <!-- Add Column -->
-                    <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[300px] h-[45px] flex">
+                    <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[200px] lg:min-w-[300px] h-[30px] lg:h-[45px] flex lg:text-md text-sm">
                         <input
                             type="text"
                             class="p-2 mr-2 flex-grow bg-transparent"
@@ -155,13 +157,13 @@
             @focusout="closeColDeletionConfirmationModal"
             >
             <div class="bg-white w-[300px] flex flex-col p-3 rounded-lg space-y-4">
-                <h1 class="font-bold text-lg">Are you sure you want to delete this column and all of its tasks?</h1>
+                <h1 class="font-bold text-sm lg:text-lg">Are you sure you want to delete this column and all of its tasks?</h1>
                 <div class="flex justify-around">
-                    <button class="bg-red-300 hover:bg-red-500 py-1 px-2 rounded-lg text-white text-sm" @click="deleteCol">
+                    <button class="bg-red-300 hover:bg-red-500 py-1 px-2 rounded-lg text-white text-xs lg:text-sm" @click="deleteCol">
                         Confirm
                     </button>
                     <button
-                        class="bg-gray-300 hover:bg-gray-500 py-1 px-2 rounded-lg text-white text-sm"
+                        class="bg-gray-300 hover:bg-gray-500 py-1 px-2 rounded-lg text-white text-xs lg:text-sm"
                         @click="closeColDeletionConfirmationModal">
                         Cancel
                     </button>
@@ -175,9 +177,9 @@
             @click.self="closeTeamModal"
             >
             <div class="flex flex-col bg-white w-[300px] rounded-lg p-2">
-                <h1 class="font-bold text-lg mb-6">Team Members</h1>
+                <h1 class="font-bold lg:text-lg mb-6">Team Members</h1>
                 <div v-for="(member, memberIndex) in project.members" :key="member.id" class="flex justify-between mb-3">
-                    <h1>{{ member.user_email }}</h1>
+                    <h1 class="lg:text-md text-sm">{{ member.user_email }}</h1>
                     <div v-if="isProjectAdmin && member.user_id != project.admin_id">
                         <div
                             v-if="confirmingTeamMemberRemoval === true && confirmingRemovalOfTeamMemberOfIndex == memberIndex"
@@ -198,7 +200,7 @@
                         <v-icon
                             v-else
                             name="io-remove-circle-sharp"
-                            class="cursor-pointer"
+                            class="cursor-pointer lg:w-[20px] w-[15px]"
                             @click="askToConfirmTeamMemberRemoval(member.id, memberIndex)"
                             />
                     </div>
@@ -519,6 +521,9 @@ let editingColOfId = ref(-1)
 const enableEditingColName = (colId) => {
     editingColName.value = true
     editingColOfId.value = colId
+    nextTick(() => {
+        document.getElementById('colNameField_' + colId).focus()
+    })
 }
 const updateColName = (colId, colIndex, event) => {
     if(event.target.value.length < 1 || event.target.value == project.value.columns[colIndex].name) {
