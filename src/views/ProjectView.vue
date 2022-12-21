@@ -17,7 +17,7 @@
                         
                         <v-icon
                             name="md-edit" 
-                            v-if="!editingProjectName"
+                            v-if="isProjectAdmin && !editingProjectName"
                             class="cursor-pointer ml-3 lg:w-[20px] w-[15px]"
                             @click="startEditingProjectName"
                         />
@@ -47,7 +47,7 @@
                 <div v-if="project" class="flex items-start">
                     <!-- Column Class Styles -->
                     <div
-                        class="p-3 mr-4 text-left shadow rounded bg-[#D9D9D9] min-w-[200px] lg:w-[300px] flex flex-col"
+                        class="p-3 mr-4 text-left shadow rounded bg-[#D9D9D9] min-w-[200px] lg:min-w-[300px] lg:w-[300px] flex flex-col"
                         v-for="(column, columnIndex) in project.columns"
                         :key="column.name"
               
@@ -228,6 +228,7 @@ import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
 import { expiryData, hasExpired } from '@/utils';
+import { useServices } from '@/components/services.js'
 
 const props = defineProps({
     projectId: [String, Number]
@@ -236,23 +237,13 @@ const props = defineProps({
 let project = ref(null)
 const route = useRoute()
 const router = useRouter()
+const services = useServices()
 
 onMounted(() => {
     watchEffect(() => {
-        // let projects =  projectsData.projects
-        // for(const p of projects)
-        // {
-        //     if(p.id == props.projectId) {
-        //         project.value = p
-        //     }
-        // }
-        ProjectService.getSingleProject(parseInt(props.projectId)).then((resp) => {
-            project.value = resp.data.data
-            console.log(resp.data)
-        }).catch(() => {
-            console.log('failed to proj of id:', props.projectId)
+        services.apiServices(ProjectService.getSingleProject, [ parseInt(props.projectId) ], null, false).then((result) => {
+            if(result.message != 'failed') project.value = result.data
         })
-        // console.log('project', project.value, 'since projectId was', props.projectId)
     })
     expiryData(localStorage.getItem('access_token'))
     console.log(hasExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
@@ -282,49 +273,26 @@ const closeTask = (taskId, taskIndexInCol, colIndexInProj, e) => {
     router.push({ name: 'ProjectView', params: { projectId: project.value.id  } })
 }
 const refreshTask = (taskId, taskIndexInCol, colIndexInProj, e) => {
-    // // validation
-    // if( !!project.value.columns[colIndexInProj].tasks[taskIndexInCol] &&
-    //     project.value.columns[colIndexInProj].tasks[taskIndexInCol].id != taskId
-    //     )
-    // {
-    //     console.log('Attempted to update the wrong id!')
-    //     return false
-    // }
     if(e == 'deleted') {
-
         project.value.columns[colIndexInProj].tasks.splice(taskIndexInCol, 1)
         return
     }
-
-    ProjectService.getSingleTask(taskId).then((resp) => {
-        if(resp.data.message != 'failed' && resp.data.data)
-        {
-            console.log('must edit', colIndexInProj, taskIndexInCol)
-            project.value.columns[colIndexInProj].tasks[taskIndexInCol] = resp.data.data
-        } 
-        console.log('from refreshTask', resp.data)
-    }).catch((err) => {
-        console.log('caught:', err)
-    }) 
+    services.apiServices(ProjectService.getSingleTask, [ parseInt(taskId) ], null, false).then((result) => {
+        if(result.message != 'failed') project.value.columns[colIndexInProj].tasks[taskIndexInCol] = result.data
+    })
 }
 const addTask = (event, columnId, columnIndex) => {
     if(event.target.value.length < 1) 
     {
         return false
     }
-
-    ProjectService.createTask(columnId, JSON.stringify({ name: event.target.value })).then((resp) => {
-        if(resp.data.message != 'failed') {
-            project.value.columns[columnIndex].tasks.push(resp.data.data)
-        }
-        console.log('resp returned from back', resp.data.data)
+    services.apiServices(ProjectService.createTask, [ parseInt(columnId) ], { name: event.target.value }, false).then((result) => {
+        if(result.message != 'failed')  project.value.columns[columnIndex].tasks.push(result.data)
     })
-
     event.target.value = ''
 }
 
 const pickupTask = (taskId, fromColOfId, fromColIndex, fromTaskIndex, event) => {
-    // fromColOfId, toColOfId, taskId
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.dropEffect = 'move'
 
@@ -465,13 +433,11 @@ let columnName = ref('')
 
 const addColumn = () => {
     if(columnName.value.length < 1) return false
-    
-    ProjectService.createColumn(project.value.id, JSON.stringify({ name: columnName.value })).then((resp) => {
-        if(resp.data.message != 'failed') {
-            project.value.columns.push(resp.data.data)
-        }
-        console.log('resp returned from backend', resp.data.data)
+
+    services.apiServices(ProjectService.createColumn, [ project.value.id ], { name: columnName.value }, false).then((result) => {
+        if(result.message != 'failed') project.value.columns.push(result.data)
     })
+
     columnName.value = ''
 }
 
@@ -502,18 +468,9 @@ const deleteCol = () => {
     closeColDeletionConfirmationModal()
 
     // Send to the backend
-    ProjectService.deleteColumn(colId).then((resp) => {
-        if(resp.data.message == 'failed') {
-            project.value.columns.splice(colIndex, 0, deletedCol)
-            console.log('failed:', resp.data.data)
-        } else {
-            console.log(resp.data.data)
-        }
-    }).catch((resp) => {
-        project.value.columns.splice(colIndex, 0, deletedCol)
-        console.log('failed:', resp.data)
+    services.apiServices(ProjectService.deleteColumn, [ colId ], null, false).then((result) => {
+        if(result.message == 'failed') project.value.columns.splice(colIndex, 0, deletedCol)
     })
-
 }
 
 let editingColName = ref(false)
@@ -539,18 +496,10 @@ const updateColName = (colId, colIndex, event) => {
     editingColOfId.value = -1
     
     // Send to the backend
-    ProjectService.updateColumn(colId, { name: event.target.value }).then((resp) => {
-        if(resp.data.message == 'failed') {
-            project.value.columns[colIndex].name = oldName
-            console.log('failed:', resp.data.data)
-        } else {
-            console.log(resp.data.data)
-        }
-        
-    }).catch((resp) => {
-        project.value.columns[colIndex].name = oldName
-        console.log('failed:', resp.data)
+        services.apiServices(ProjectService.updateColumn, [ colId ], { name: event.target.value }, false).then((result) => {
+        if(result.message == 'failed') project.value.columns[colIndex].name = oldName
     })
+    
 }
 const disableEditingColName = (colIndex, event) => {
     event.target.value = project.value.columns[colIndex].name
@@ -633,38 +582,22 @@ const updateProjectName = () => {
         updatedProjectName.value = ''
         return false
     }
-    
     project.value.name = updatedProjectName.value
 
-    ProjectService.updateProject(project.value.id, { name: updatedProjectName.value }).then((resp) => {
-        if(resp.data.message == 'failed') {
-            project.value.name = oldProjectName
-            console.log('failed:', resp.data.data)
-        } else {
-            console.log(resp.data.data)
-        }
-    }).catch((resp) => {
-        project.value.name = oldProjectName
-        console.log('failed:', resp.data)
+    services.apiServices(ProjectService.updateProject, [ project.value.id ], { name: updatedProjectName.value }, false).then((result) => {
+    if(result.message == 'failed') project.value.name = oldProjectName
     })
-
     updatedProjectName.value = ''
 }
 
 const addToArchive = () => {
-    ProjectService.addToArchive(project.value.id).then((resp) => {
-        if(resp.data.message != 'failed') {
-            // to refresh sidebar too
-            window.location = '/' + project.value.id
-        }
+    services.apiServices(ProjectService.addToArchive, [ project.value.id ], null, false).then((result) => {
+        if(result.message != 'failed') window.location = '/' + project.value.id
     })
 }
 const unarchive = () => {
-    ProjectService.removeFromArchive(project.value.id).then((resp) => {
-        if(resp.data.message != 'failed') {
-            // to refresh sidebar too
-            window.location = '/' + project.value.id
-        }
+    services.apiServices(ProjectService.removeFromArchive, [ project.value.id ], null, false).then((result) => {
+        if(result.message != 'failed') window.location = '/' + project.value.id
     })
 }
 </script> 

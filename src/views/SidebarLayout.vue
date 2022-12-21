@@ -109,6 +109,8 @@ let selectedProjectId = computed(() => {
         }
 
         // if reached here, nothing was found. Therefore, it is archived or a 404
+        if(!archivedProjects.value) return -1
+
         for(let i = 0; i < archivedProjects.value.length; i++) {
             if(archivedProjects.value[i].id == route.params.projectId)
             {
