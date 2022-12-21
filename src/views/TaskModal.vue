@@ -1,11 +1,11 @@
 <template>
-    <div  @click.self="emitCloseTask">
-        <div class="flex bg-white pin mx-auto mt-3 py-4 px-6 text-left rounded max-w-[700px]" v-if="task">
-            <div class="flex flex-col flex-grow justify-between items-start">
+    <div @click.self="emitCloseTask">
+        <div class="flex bg-white pin mx-auto mt-3 lg:py-4 lg:px-6 py-2 px-3 text-left rounded w-[300px] lg:max-w-[700px] overflow-y-auto max-h-[500px]" v-if="task">
+            <div class="flex flex-col flex-grow justify-between items-start w-full">
                 <div class="flex justify-between w-full">
                     <input
                         type="text"
-                        class="p-2 mr-2 flex-grow text-xl font-bold"
+                        class="p-2 mr-2 flex-grow text-sm lg:text-xl font-bold md:w-[120px]"
                         :value="task.name"
                         @change="updateName($event)"
                     />
@@ -18,7 +18,7 @@
                 </div>
 
                 <textarea
-                    class="mt-5 w-full text-sm p-1 border border-gray-500 h-[100px] resize-none rounded-lg"
+                    class="mt-5 w-full text-xs lg:text-sm p-1 border border-gray-500 min-h-[100px] resize-none rounded-lg"
                     :value=task.description
                     placeholder="Description..."
                     @change="updateDescription($event)"
@@ -26,8 +26,8 @@
 
 
                 <!-- Assignee -->
-                <div class="flex justify-start mt-6" v-if="members && members.length > 0">
-                    <h1 class="text-lg mr-6">Assignee:</h1>
+                <div class="flex justify-start mt-6 text-sm lg:text-lg items-center" v-if="members && members.length > 0">
+                    <h1 class="mr-6" :class="{'lg:block hidden': confirmingNewUserAssignment}">Assignee:</h1>
                     <select class="border border-black py-1" v-model="assigneeId" @change="askToConfirmNewUserAssignment">
                         <option v-for="member in members" :key="member.user_id" :value="member.user_id" :selected="member.user_id==assigneeId">
                             {{ member.user_email }}
@@ -59,22 +59,22 @@
 
                 <!-- Comments -->
                 <div class="flex flex-col mt-6 w-full">
-                    <h1 class="text-lg mb-3 font-bold">Comments:</h1>
+                    <h1 class="text-sm lg:text-lg mb-3 font-bold">Comments:</h1>
                     <!-- Add a Comment -->
                     <div class="flex flex-col bg-slate-100 space-y-2 rounded-lg p-2">
                         <textarea
-                            class="resize-none self-center bg-transparent p-2 w-full border border-gray-700 rounded-lg"
+                            class="lg:text-md text-sm resize-none self-center bg-transparent p-2 w-full border-b border-gray-700"
                             placeholder="Comment..."
                             v-model="commentBody"/>
                         <div class="flex justify-end space-x-2">
                             <button
-                                class="p-1 text-sm rounded-lg bg-blue-300 hover:bg-blue-500 hover:text-white"
+                                class="p-1 text-xs lg:text-sm rounded-lg bg-blue-300 hover:bg-blue-500 hover:text-white"
                                 @click="addComment"
                                 >
                                 Submit
                             </button>
                             <button
-                                class="p-1 text-sm rounded-lg bg-gray-300 hover:bg-gray-500 hover:text-white"
+                                class="p-1 text-xs lg:text-sm rounded-lg bg-gray-300 hover:bg-gray-500 hover:text-white"
                                 @click="emptyCommentField"
                                 >
                                 Cancel
@@ -89,7 +89,7 @@
                         class="bg-slate-200 rounded-lg flex flex-col space-y-3 mt-3 p-2"
                         >
                         <div class="flex justify-between">
-                            <h1 class="font-bold">{{ memberIdNameMapper[comment.author_id] }}</h1>
+                            <h1 class="font-bold lg:text-md text-sm">{{ memberIdNameMapper[comment.author_id] }}</h1>
 
                             <!-- Controls -->
                             <div v-if="comment.author_id == authUser.id">
@@ -108,10 +108,10 @@
                                 </button>
                             </div>
                         </div>
-                        <div v-if="editingCommentOfId != comment.id">{{ comment.body }}</div>
-                        <textarea v-else placeholder="{{comment.body}}" class="bg-transparent border border-black p-2" v-model="commentBodyBeingEdited[comment.id]"/>
+                        <div v-if="editingCommentOfId != comment.id" class="lg:text-md text-xs">{{ comment.body }}</div>
+                        <textarea v-else placeholder="{{comment.body}}" class="bg-transparent border border-black p-2 lg:text-md text-xs" v-model="commentBodyBeingEdited[comment.id]"/>
                     </div>
-                    <h1 class="italic mx-auto mt-3" v-if="task.comments.length < 1">No Comments Yet</h1>
+                    <h1 class="italic mx-auto mt-3 lg:text-md text-xs" v-if="task.comments.length < 1">No Comments Yet</h1>
                 </div>
             </div>
         </div>
