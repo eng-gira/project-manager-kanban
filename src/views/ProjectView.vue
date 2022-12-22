@@ -143,7 +143,7 @@
         </div>
         <!-- Task Modal -->
         <div 
-            class="bg-transparent absolute inset-0 semi-transparent overflow-y-auto"
+            class="absolute inset-0 bg-[rgba(0,0,0,0.5)] overflow-y-auto"
             v-if="isTaskOpen"
             >
             <router-view @close-task="closeTask"/>
@@ -151,7 +151,7 @@
     
         <!-- Col Deletion Confirmation Modal -->
         <div 
-            class="bg-transparent absolute inset-0 semi-transparent grid h-screen place-items-center"
+            class="absolute inset-0 bg-[rgba(0,0,0,0.5)] grid h-screen place-items-center"
             v-if="confirmColDeletionModalVisible"
             @click.self="closeColDeletionConfirmationModal"
             @focusout="closeColDeletionConfirmationModal"
@@ -171,55 +171,7 @@
             </div>
         </div>
         <!-- Team Modal -->
-        <div 
-            class="bg-transparent absolute inset-0 semi-transparent grid h-screen place-items-center overflow-y-auto"
-            v-if="teamModalVisible"
-            @click.self="closeTeamModal"
-            >
-            <div class="flex flex-col bg-white w-[300px] rounded-lg p-2">
-                <h1 class="font-bold lg:text-lg mb-6">Team Members</h1>
-                <div v-for="(member, memberIndex) in project.members" :key="member.id" class="flex justify-between mb-3">
-                    <h1 class="lg:text-md text-sm">{{ member.user_email }}</h1>
-                    <div v-if="isProjectAdmin(project.admin_id) && member.user_id != project.admin_id">
-                        <div
-                            v-if="confirmingTeamMemberRemoval === true && confirmingRemovalOfTeamMemberOfIndex == memberIndex"
-                            >
-                            <button
-                                class="py-1 px-2 text-xs rounded-lg bg-red-300 hover:bg-red-500 hover:text-white mr-3"
-                                @click="removeTeamMember(member.user_email, memberIndex)"                        
-                            >
-                                Confirm
-                            </button>
-                            <button
-                                class="py-1 px-2 text-xs rounded-lg bg-gray-300 hover:bg-gray-500 hover:text-white"
-                                @click="closeTeamMemberRemovalConfirmation"                            
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                        <v-icon
-                            v-else
-                            name="io-remove-circle-sharp"
-                            class="cursor-pointer lg:w-[20px] w-[15px]"
-                            @click="askToConfirmTeamMemberRemoval(member.id, memberIndex)"
-                            />
-                    </div>
-                </div>
-                <form  @submit.prevent="addMember" class="flex justify-between mt-3" v-if="isProjectAdmin(project.admin_id)">
-                    <input
-                        type="text"
-                        class="p-2 mr-2 text-xs flex-grow bg-transparent border border-black rounded-md h-[28px]"
-                        placeholder="Member Email"
-                        v-model="emailOfMemberToAdd"
-                        />
-                    <button
-                        class="rounded-lg px-2 py-1 text-xs bg-blue-300 hover:bg-blue-500 hover:text-white"
-                        >
-                        Add
-                    </button>
-                </form>
-            </div>
-        </div>
+        <TeamModal :project="project" v-if="teamModalVisible" @click.self="closeTeamModal"/>
     </div>
 </template>
 <script setup>
@@ -229,6 +181,7 @@ import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
 import { expiryData, hasExpired, isProjectAdmin } from '@/utils';
 import { useServices } from '@/components/services.js'
+import TeamModal from '@/components/TeamModal.vue'
 
 const props = defineProps({
     projectId: [String, Number]
@@ -505,51 +458,7 @@ const openTeamModal = () => {
 const closeTeamModal = () => {
     teamModalVisible.value = false
     isModalOpen.value = false
-    closeTeamMemberRemovalConfirmation()
 }
-let emailOfMemberToAdd = ref('')
-const addMember = () => {
-    if(emailOfMemberToAdd.value.length > 0) {
-        ProjectService.addMember(
-            project.value.id, 
-            JSON.stringify( {email: emailOfMemberToAdd.value } )
-        ).then((resp) => {
-                if(resp.data.message != 'failed')
-                {
-                    console.log('returned member', resp.data.data)
-                    project.value.members.push(resp.data.data)
-                }
-                else {
-                    console.log('failed:', resp.data.data)
-                }
-        }).catch((err) => {
-                console.log('caught', err)
-        })
-        
-        emailOfMemberToAdd.value = ''
-    }
-}
-
-let confirmingTeamMemberRemoval = ref(false)
-let confirmingRemovalOfTeamMemberOfIndex = ref(-1)
-const askToConfirmTeamMemberRemoval = (memberId, memberIndex) => {
-    confirmingTeamMemberRemoval.value = true
-    confirmingRemovalOfTeamMemberOfIndex.value = memberIndex
-}
-const closeTeamMemberRemovalConfirmation = () => {
-    confirmingTeamMemberRemoval.value = false
-    confirmingRemovalOfTeamMemberOfIndex.value = -1
-}
-const removeTeamMember = (memberEmail, memberIndex) => {
-
-    ProjectService.removeMember(project.value.id, JSON.stringify({ email: memberEmail })).then((resp) => {
-        if(resp.data.message != 'failed') {
-            project.value.members.splice(memberIndex, 1)[0]
-            closeTeamMemberRemovalConfirmation()
-        }
-    })
-}
-
 let updatedProjectName = ref('')
 let editingProjectName = ref(false)
 let projectNameRef = ref(null)
@@ -590,10 +499,4 @@ const unarchive = () => {
         if(result.message != 'failed') window.location = '/' + project.value.id
     })
 }
-</script> 
-
-<style>
-.semi-transparent {
-    background-color: rgba(0,0,0,0.5);
-}
-</style>
+</script>
