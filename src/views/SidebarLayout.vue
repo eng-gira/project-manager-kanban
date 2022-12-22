@@ -2,28 +2,33 @@
     <div class="flex">
         <!-- Sidebar -->
         <!-- bg-blue-100  -->
-        <div class="hidden lg:block flex flex-col self-start h-screen overflow-y-auto w-[360px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
-            <div class="flex flex-col items-center mt-6 text-sm px-4">
-                <h1 class="font-bold mb-6 self-start">Projects</h1>
+        <v-icon v-if="isSmall && !showSidebarAtSmall" name="co-hamburger-menu" @click="showSidebar"/>
+        <div :class="{'hidden': isSmall && !showSidebarAtSmall, 'absolute inset-0': isSmall}" 
+            class="delay-100 flex flex-col self-start h-screen overflow-y-auto w-[240px] lg:w-[360px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
+            <div class="flex flex-col items-center mt-6 text-xs lg:text-sm px-4">
+                <div class="flex justify-between w-[180px] lg:w-[220px]">
+                    <h1 class="font-bold mb-6 self-start">Projects</h1>
+                    <v-icon v-if="isSmall" name="io-chevron-back" @click="hideSidebar"/>
+                </div>
                 <div v-if="!projects" class="italic mb-3">Loading...</div>
                 <router-link
                     v-else
                     v-for="(project, projectIndex) in projects"
                     :key="projectIndex"
-                    class="w-[220px] h-[45px] rounded-md flex flex-col justify-center items-start mb-3"
+                    class="w-[180px] lg:w-[220px] h-[45px] rounded-md flex flex-col justify-center items-start mb-3 px-2"
                     :class="project.id==selectedProjectId ? 
                         'bg-[#0C4689] text-white' :
                         'bg-[#F4F4F4] cursor-pointer hover:bg-[#0C4689] hover:text-white'"
                     :to="{name: 'ProjectView', params: { projectId: project.id }}"
                     >
-                    <h1 class="ml-3">{{ project.name }}</h1>
+                    <h1 class="text-start">{{ project.name }}</h1>
                 </router-link>
 
                 <div class="text-sm">
                     <h1 class="italic text-xs" :class="{'text-red-500': errorInCreateProject}" v-if="createProjectStatusMessage"> {{ createProjectStatusMessage }} </h1>
                     <div
                         v-if="!creatingProject"
-                        class="bg-[#F4F4F4] hover:underline w-[220px] h-[45px] rounded-md flex items-center space-x-3 px-4 cursor-pointer"
+                        class="bg-[#F4F4F4] hover:underline w-[180px] lg:w-[220px] h-[45px] rounded-md flex items-center space-x-3 px-4 cursor-pointer"
                         @click="startCreatingProject"
                         >
                         <v-icon class="justify-self-start" name="io-add-outline" />
@@ -37,7 +42,7 @@
                             @keyup.enter="createProject($event)"
                             @keyup.esc="closeProjectCreate"
                             @focusout="closeProjectCreate"
-                            class="bg-[#F4F4F4] rounded-md p-2 w-[220px] h-[45px]"
+                            class="bg-[#F4F4F4] rounded-md p-2 w-[180px] lg:w-[220px] h-[45px]"
                             />
                     </div>
                 </div>
@@ -47,7 +52,7 @@
                 <router-link
                     v-for="(archivedProject, archivedProjectIndex) in archivedProjects"
                     :key="archivedProjectIndex"
-                    class="w-[220px] h-[28px] rounded-md flex flex-col justify-center items-start mb-3"
+                    class="w-[180px] lg:w-[220px] h-[28px] rounded-md flex flex-col justify-center items-start mb-3"
                     :class="archivedProject.id==selectedProjectId ? 
                         'bg-gray-500 text-white' :
                         'bg-[#F4F4F4] cursor-pointer hover:bg-gray-500 hover:text-white'"
@@ -59,7 +64,7 @@
             <div class="mt-auto self-center">
                 <div
                     @click="logout"
-                    class="cursor-pointer text-sm font-bold mb-6 bg-[#F4F4F4] text-red-500 w-[220px] h-[45px] rounded-md hover:bg-gray-300 flex flex-col justify-center">
+                    class="cursor-pointer text-xs lg:text-sm font-bold mb-6 bg-[#F4F4F4] text-red-500 w-[180px] lg:w-[220px] h-[45px] rounded-md hover:bg-gray-300 flex flex-col justify-center">
                     Logout
                 </div>
             </div>
@@ -70,16 +75,16 @@
     </div>
 </template>
 <script setup>
-import ProjectService from '@/services/ProjectService';
+import ProjectService from '@/services/ProjectService'
 import { ref, onMounted, computed, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router';
-
+import { useRoute, useRouter } from 'vue-router'
+import { useMedia } from '@/components/media.js'
 
 let archivedProjects = ref(null)
 const route = useRoute()
 const router = useRouter()
-
 let projects = ref(null)
+const isSmall = useMedia('(max-width: 768px)')
 
 onMounted(() => {
     ProjectService.getProjects().then((resp) => {
@@ -164,6 +169,14 @@ const createProject = (event) => {
     closeProjectCreate()
 }
 
+let showSidebarAtSmall = ref(false)
+const showSidebar = () => {
+    console.log('show sidebar')
+    showSidebarAtSmall.value = true
+}
+const hideSidebar = () => {
+    showSidebarAtSmall.value = false
+}
 </script>
 <style>
 .sidebar {

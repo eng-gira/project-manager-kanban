@@ -24,7 +24,7 @@
 
                         <div class="rounded-md py-1 px-2 text-xs lg:text-sm bg-[#EAEAEA] cursor-pointer ml-6" @click="openTeamModal">Team</div>
                     </div>
-                    <div v-if="isProjectAdmin(project.admin_id)">
+                    <div v-if="isProjectAdmin(project.admin_id) && !editingProjectName">
                         <button
                             v-if="project.archived == 0"
                             class="bg-red-300 hover:bg-red-500 hover:text-white text-xs lg:text-sm px-2 py-1 rounded-lg ml-8"
@@ -592,7 +592,7 @@ const unarchive = () => {
 }
 </script> 
 
-<style scoped>
+<style>
 .semi-transparent {
     background-color: rgba(0,0,0,0.5);
 }

@@ -7,9 +7,9 @@ import "./assets/main.css";
 
 
 import { OhVueIcon, addIcons } from "oh-vue-icons";
-import { MdEdit, IoRemoveCircleSharp, IoAddOutline} from "oh-vue-icons/icons";
+import { MdEdit, IoRemoveCircleSharp, IoAddOutline, CoHamburgerMenu, IoChevronBack} from "oh-vue-icons/icons";
 
-addIcons(MdEdit, IoRemoveCircleSharp, IoAddOutline);
+addIcons(MdEdit, IoRemoveCircleSharp, IoAddOutline, CoHamburgerMenu, IoChevronBack);
 
 
 createApp(App).use(store).use(router).component("v-icon", OhVueIcon).mount('#app')
