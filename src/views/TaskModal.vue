@@ -26,9 +26,9 @@
 
 
                 <!-- Assignee -->
-                <div class="flex justify-start mt-6 text-sm lg:text-lg items-center" v-if="members && members.length > 0">
+                <div class="flex justify-start mt-6 lg:text-lg items-center" v-if="members && members.length > 0">
                     <h1 class="mr-6" :class="{'lg:block hidden': confirmingNewUserAssignment}">Assignee:</h1>
-                    <select class="border border-black lg:text-md text-xs" v-model="assigneeId" @change="askToConfirmNewUserAssignment">
+                    <select class="border border-black text-sm" v-model="assigneeId" @change="askToConfirmNewUserAssignment">
                         <option v-for="member in members" :key="member.user_id" :value="member.user_id" :selected="member.user_id==assigneeId">
                             {{ member.user_email }}
                         </option>
@@ -99,7 +99,7 @@
                                     Edit
                                 </button>
                                 <div v-else>
-                                    <button class="text-xs bg-[#0C4689] px-2 py-1 rounded-lg mr-3" @click="updateComment(comment.id, commentIndex)">Save</button>
+                                    <button class="text-xs bg-[#0C4689] text-white px-2 py-1 rounded-lg mr-3" @click="updateComment(comment.id, commentIndex)">Save</button>
                                     <button class="text-xs bg-gray-300 hover:bg-gray-500 px-2 py-1 rounded-lg" @click="stopEditingComment">Cancel</button>
                                 </div>
 
@@ -122,6 +122,7 @@ import { onMounted, ref, defineEmits, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import ProjectService from '@/services/ProjectService';
 import jwt_decode from "jwt-decode";
+import { useService } from '@/components/apiService';
 
 const props = defineProps({
     id: [String, Number],
@@ -137,32 +138,25 @@ const route = useRoute()
 let authUser = ref(null)
 const attachments = ref(null)
 let memberIdNameMapper = ref({})
+const service = useService()
 onMounted(() => {
-    console.log(props.columnIndex)
-    
-    ProjectService.getSingleTask(props.id).then((resp) => {
-        if(resp.data.message == 'failed') {
-            console.log('failed:', resp.data.data)
-        } else {
-            task.value = resp.data.data
+    service.apiService(ProjectService.getSingleTask, [props.id]).then((result) => {
+        if(result.message != 'failed') {
+            console.log('fetched task')
+            task.value = result.data
             assigneeId.value = task.value.assignee_id
         }
-    }).catch((resp) => {
-        console.log('failed:', resp.data)
     })
 
-    ProjectService.getMembers(route.params.projectId).then((resp) => {
-        if (resp.data.message != 'failed')
-        { 
-            members.value = resp.data.data
+    service.apiService(ProjectService.getMembers, [route.params.projectId], null).then((result) => {
+        if(result.message != 'failed') {
+            console.log('fetched members')
+            members.value = result.data
             for(let i = 0; i < members.value.length; i++) {
                 memberIdNameMapper.value[members.value[i].user_id] = members.value[i].user_data.name
-            }       
+            }   
         }
-    }).catch((resp) => {
-        console.log('failed to get members:', resp)
     })
-
     // Get the user data from token
     const token = localStorage.getItem('access_token')
     let decoded = jwt_decode(token)
@@ -181,21 +175,11 @@ const updateName = (event) => {
         task.value.name = newTaskName 
         event.target.blur()
 
-        ProjectService.updateTask(task.value.id, { name: newTaskName  }).then((resp) => {
-            if(resp.data.message == 'failed') {
-                task.value.name = oldTaskName
-                console.log('failed', resp.data.data)
-            }
-            else {
-                console.log(resp.data.data)
-                // emit('task-updated')
-            }
-            waitingForBE.value = false
-        }).catch((resp) => {
-            task.value.name = oldTaskName
-            console.log('caught', resp.data)
-            waitingForBE.value = false
+        service.apiService(ProjectService.updateTask, [task.value.id], { name: newTaskName  }).then((result) => {
+            if(result.message == 'failed') task.value.name = oldTaskName
         })
+        .catch(() => { task.value.name = oldTaskName })
+        .finally(() => { waitingForBE.value = false })
     }
 }
 const updateDescription = (event) => {
@@ -207,43 +191,24 @@ const updateDescription = (event) => {
         task.value.description = newDescription 
         event.target.blur()
 
-        ProjectService.updateTask(task.value.id, { name: task.value.name, description: newDescription  }).then((resp) => {
-            if(resp.data.message == 'failed') {
-                task.value.description = oldDescription
-                console.log('failed', resp.data.data)
-            }
-            else {
-                console.log(resp.data.data)
-            }
-            waitingForBE.value = false
-        }).catch((resp) => {
-            task.value.description = oldDescription
-            console.log('caught', resp.data)
-            waitingForBE.value = false
+
+        service.apiService(ProjectService.updateTask, [task.value.id], { name: task.value.name, description: newDescription  }).then((result) => {
+            if(result.message == 'failed') task.value.description = oldDescription
         })
+        .catch(() => { task.value.description = oldDescription })
+        .finally(() => { waitingForBE.value = false })
     }
 }
 let deletingTask = ref(false)
 const deleteTask = () => {
     waitingForBE.value= true
     deletingTask.value = true
-    ProjectService.deleteTask(task.value.id).then((resp) => {
-        waitingForBE.value = false
-        deletingTask.value = false
 
-        if(resp.data.message == 'failed') {
-            console.log('failed:', resp.data.data)
-        } else {
-            console.log(resp.data.data)
-            emitCloseTask('deleted')
-        }
-        waitingForBE.value = false
-    }).catch((resp) => {
-        waitingForBE.value = false
-    
-        deletingTask.value = false
-        console.log('failed:', resp.data)
-    })
+    service.apiService(ProjectService.deleteTask, [task.value.id]).then((result) => {
+            waitingForBE.value = false; deletingTask.value = false
+            if(result.message != 'failed') emitCloseTask('deleted')
+        })
+        .catch(() => { waitingForBE.value = false; deletingTask.value = false })
 }
 
 const emitCloseTask = (e = null) => {
@@ -255,12 +220,8 @@ let commentBody = ref('')
 const addComment = () => {
     if(commentBody.value.length < 1) return false
 
-    ProjectService.createComment(task.value.id, JSON.stringify({ body: commentBody.value })).then((resp) => {
-        if(resp.data.message != 'failed') {
-
-            task.value.comments.push(resp.data.data)
-        }
-        console.log(resp.data.data)
+    service.apiService(ProjectService.createComment, [task.value.id], { body: commentBody.value }).then((result) => {
+        if(result.message != 'failed') task.value.comments.push(result.data)
     })
 
     commentBody.value = ''
@@ -286,20 +247,14 @@ const updateComment = (id, commentIndex) => {
     commentBodyBeingEdited.value[id] = ''
     stopEditingComment()
 
-    ProjectService.updateComment(id, JSON.stringify({ body: newBody })).then((resp) => {
-        if(resp.data.message != 'failed')
-        {
-            task.value.comments[commentIndex].body = resp.data.data.body
-        }
+    service.apiService(ProjectService.updateComment, [id], { body: newBody}).then((result) => {
+        if(result.message != 'failed') task.value.comments[commentIndex].body = result.data.body
     })
 }
 
 const deleteComment = (id, commentIndex) => {
-    ProjectService.deleteComment(id).then((resp) => {
-        if(resp.data.message != 'failed')
-        {
-            task.value.comments.splice(commentIndex, 1)[0]
-        }
+    service.apiService(ProjectService.deleteComment, [id]).then((result) => {
+        if(result.message != 'failed')  task.value.comments.splice(commentIndex, 1)[0]
     })
 }
 
@@ -316,19 +271,14 @@ const closeConfirmationOfNewUserAssignment = () => {
     confirmingNewUserAssignment.value = false
 }
 const assignNewUser = () => {
-    ProjectService.updateTask(task.value.id, JSON.stringify({ name: task.value.name, assignee_id: assigneeId.value })).then((resp) => {
-        if(resp.data.message == 'failed')
-        {
+    service.apiService(ProjectService.updateTask, [task.value.id], { name: task.value.name, assignee_id: assigneeId.value }).then((result) => {
+        if(result.message != 'failed')  { 
+            task.value.assignee_id = result.data.assignee_id
             assigneeId.value = task.value.assignee_id
-            console.log('failed:', resp.data.data)
-        } else 
-        {
-            task.value.assignee_id = resp.data.data.assignee_id // assigning task.assignee_id to the new task is assignee id returned from backend
-            assigneeId.value = task.value.assignee_id // storing the new assignee_id in the ref assigneeId
-            console.log(resp.data.data)
         }
-
+        else assigneeId.value = task.value.assignee_id
     })
+
     closeConfirmationOfNewUserAssignment()
 }
 </script>

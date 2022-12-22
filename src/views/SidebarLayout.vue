@@ -81,7 +81,6 @@ import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMedia } from '@/components/media.js'
 import { useService } from '@/components/apiService.js'
-import { useLoader } from '@/components/loadingService'
 
 let archivedProjects = ref(null)
 const route = useRoute()
@@ -91,13 +90,15 @@ const isSmall = useMedia('(max-width: 768px)')
 const service = useService()
 
 onMounted(() => {
-    useLoader([
-        service.apiService(ProjectService.getProjects),
-        service.apiService(ProjectService.getArchivedProjects)
-    ]).then((results) => {
-        if(results[0].message != 'failed') projects.value = results[0].data 
-        if(results[1].message != 'failed') archivedProjects.value = results[1].data 
+    service.apiService(ProjectService.getProjects).then((result) => {
+        if(result.message != 'failed') projects.value = result.data 
+        console.log('fin. projs')
     })
+    service.apiService(ProjectService.getArchivedProjects).then((result) => {
+        if(result.message != 'failed') archivedProjects.value = result.data 
+        console.log('fin. archive')
+    })
+    
 })
 let selectedProjectId = computed(() => {
     if(!projects.value) return -1
@@ -147,17 +148,13 @@ const closeProjectCreate = () => {
 const createProject = (event) => {
     createProjectStatusMessage.value = 'Loading...'
     if(event.target.value.length > 0) {
-        ProjectService.createProject(JSON.stringify({ name: event.target.value })).then((resp) => {
-            if(resp.data.message == 'failed')
-            {
+        service.apiService(ProjectService.createProject, [], { name: event.target.value }).then((result) => {
+            if(result.message == 'failed') {
                 errorInCreateProject.value = true
-                createProjectStatusMessage.value = resp.data.data
-                // console.log(resp.data.message)
-            }
-            else {
-                projects.value.push(resp.data.data)
+                createProjectStatusMessage.value = result.data  
+            } else {
+                projects.value.push(result.data)
                 createProjectStatusMessage.value = ''
-                // console.log(resp.data.data)
             }
         })
     } else {

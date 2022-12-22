@@ -28,6 +28,7 @@
     </form>
 </template>
 <script setup>
+import { useService } from '@/components/apiService'
 import ProjectService from '@/services/ProjectService'
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -38,6 +39,7 @@ let email = ref('')
 let password = ref('')
 let err = ref('')
 let formLoading = ref(false)
+const service = useService()
 
 function login() {
     if(email.value.length < 1 || password.value.length < 1)
@@ -48,13 +50,14 @@ function login() {
 
     formLoading.value = true
 
-    ProjectService.login(JSON.stringify({ email: email.value, password: password.value })).then((resp) => {
-        if(resp.data.message == 'failed') {
-            err.value = resp.data.message
+    service.apiService(ProjectService.login, [], { email: email.value, password: password.value }).then((result) => {
+        if(result.message == 'failed') {
+            err.value = result.message
         }
         else {
-            console.log(resp.data.access_token)
-            localStorage.setItem('access_token', resp.data.access_token)
+            console.log('result.data', result.data)
+            console.log(result.data)
+            localStorage.setItem('access_token', result.data)
 
             if(route.query.to) {
                 router.push(route.query.to)
@@ -64,12 +67,9 @@ function login() {
                 router.push({ name: 'HomeView' })
             }
         }
-        
-    }).catch((err) => {
-        err.value = err
-    }).finally(() => {
-        formLoading.value = false
     })
+    .catch((err) => { err.value = err })
+    .finally(() => { formLoading.value = false })
 }
 
 </script>

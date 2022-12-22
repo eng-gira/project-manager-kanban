@@ -40,10 +40,10 @@ protectedEPClient.interceptors.request.use(async function (config) {
                 }
             })
             // console.log('refresh token request resp:', resp.status)
-            if(resp.data.access_token) {
+            if(resp.data.data) {
                 // console.log('refreshed access_token', resp.data.access_token)
-                localStorage.setItem('access_token', resp.data.access_token)
-                config.headers.Authorization = 'Bearer ' + resp.data.access_token
+                localStorage.setItem('access_token', resp.data.data)
+                config.headers.Authorization = 'Bearer ' + resp.data.data
                 // console.log('the sent authorization header after rfr4:', config.headers.Authorization)
                 return config
             } else 
@@ -81,8 +81,16 @@ protectedEPClient.interceptors.response.use(function (response) {
     console.log('error.response:', error.response)
     console.log('error.response.status:', error.response.status)
     console.log('error.response.message:', error.response.message)
+    console.log('error.response.data.message:', error.response.data.message)
+    console.log('error.response.config.baseURL + / + error.response.config.url:', error.response.config.baseURL + '/' + error.response.config.url)
 
-    router.push({name: 'ErrorDisplayView', params: { status: error.response.status }})
+    if(localStorage.getItem('access_token') && error.response.data.message == 'Unauthenticated.') {
+        console.log('lagged refresh... pushing to', router.currentRoute.value.fullPath)
+        router.push(router.currentRoute.value.fullPath)
+    } else {
+        router.push({name: 'ErrorDisplayView', params: { status: error.response.status }})
+    }
+
     return Promise.reject(error);
 })
 

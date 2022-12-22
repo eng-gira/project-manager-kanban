@@ -181,7 +181,6 @@ import ProjectService from '@/services/ProjectService';
 import { expiryData, hasExpired, isProjectAdmin } from '@/utils';
 import { useService } from '@/components/apiService.js'
 import TeamModal from '@/components/TeamModal.vue'
-import { useLoader } from '@/components/loadingService';
 
 const props = defineProps({
     projectId: [String, Number]
@@ -194,9 +193,9 @@ const service = useService()
 
 onMounted(() => {
     watchEffect(() => {
-        useLoader( [ service.apiService(ProjectService.getSingleProject, [ parseInt(props.projectId) ], null, false) ] )
-            .then((results) => {
-                    if(results[0].message != 'failed') project.value = results[0].data
+        service.apiService(ProjectService.getSingleProject, [ parseInt(props.projectId) ], null)
+            .then((result) => {
+                if(result.message != 'failed') project.value = result.data
             })
     })
     expiryData(localStorage.getItem('access_token'))
@@ -221,8 +220,8 @@ const refreshTask = (taskId, taskIndexInCol, colIndexInProj, e) => {
         project.value.columns[colIndexInProj].tasks.splice(taskIndexInCol, 1)
         return
     }
-    useLoader([service.apiService(ProjectService.getSingleTask, [ parseInt(taskId) ], null, false)]).then((results) => {
-        if(results[0].message != 'failed') project.value.columns[colIndexInProj].tasks[taskIndexInCol] = results[0].data
+    service.apiService(ProjectService.getSingleTask, [ parseInt(taskId) ], null).then((result) => {
+        if(result.message != 'failed') project.value.columns[colIndexInProj].tasks[taskIndexInCol] = result.data
     })
 }
 const addTask = (event, columnId, columnIndex) => {
@@ -230,8 +229,8 @@ const addTask = (event, columnId, columnIndex) => {
     {
         return false
     }
-    useLoader([ service.apiService(ProjectService.createTask, [ parseInt(columnId) ], { name: event.target.value }, false)]).then((results) => {
-        if(results[0].message != 'failed')  project.value.columns[columnIndex].tasks.push(results[0].data)
+    service.apiService(ProjectService.createTask, [ parseInt(columnId) ], { name: event.target.value }).then((result) => {
+        if(result.message != 'failed')  project.value.columns[columnIndex].tasks.push(result.data)
     })
     event.target.value = ''
 }
@@ -378,9 +377,9 @@ let columnName = ref('')
 const addColumn = () => {
     if(columnName.value.length < 1) return false
 
-    useLoader([service.apiService(ProjectService.createColumn, [ project.value.id ], { name: columnName.value }, false)])
-        .then((results) => {
-            if(results[0].message != 'failed') project.value.columns.push(results[0].data)
+    service.apiService(ProjectService.createColumn, [ project.value.id ], { name: columnName.value })
+        .then((result) => {
+            if(result.message != 'failed') project.value.columns.push(result.data)
         })
 
     columnName.value = ''
@@ -413,8 +412,8 @@ const deleteCol = () => {
     closeColDeletionConfirmationModal()
 
     // Send to the backend
-    useLoader([service.apiService(ProjectService.deleteColumn, [ colId ], null, false)]).then((results) => {
-        if(results[0].message != 'failed') project.value.columns.splice(colIndex, 1)[0]
+    service.apiService(ProjectService.deleteColumn, [ colId ], null).then((result) => {
+        if(result.message != 'failed') project.value.columns.splice(colIndex, 1)[0]
         // project.value.columns.splice(colIndex, 0, deletedCol)
     })
 }
@@ -442,9 +441,9 @@ const updateColName = (colId, colIndex, event) => {
     editingColOfId.value = -1
     
     // Send to the backend
-    useLoader([service.apiService(ProjectService.updateColumn, [ colId ], { name: event.target.value }, false)])
-        .then((results) => {
-            if(results[0].message == 'failed') project.value.columns[colIndex].name = oldName
+    service.apiService(ProjectService.updateColumn, [ colId ], { name: event.target.value })
+        .then((result) => {
+            if(result.message == 'failed') project.value.columns[colIndex].name = oldName
         })
     
 }
@@ -487,21 +486,21 @@ const updateProjectName = () => {
     }
     project.value.name = updatedProjectName.value
 
-    useLoader([service.apiService(ProjectService.updateProject, [ project.value.id ], { name: updatedProjectName.value }, false)])
-        .then((results) => {
-            if(results[0].message == 'failed') project.value.name = oldProjectName
+    service.apiService(ProjectService.updateProject, [ project.value.id ], { name: updatedProjectName.value })
+        .then((result) => {
+            if(result.message == 'failed') project.value.name = oldProjectName
         })
     updatedProjectName.value = ''
 }
 
 const addToArchive = () => {
-    useLoader([service.apiService(ProjectService.addToArchive, [ project.value.id ], null, false)]).then((results) => {
-        if(results[0].message != 'failed') window.location = '/' + project.value.id
+    service.apiService(ProjectService.addToArchive, [ project.value.id ], null).then((result) => {
+        if(result.message != 'failed') window.location = '/' + project.value.id
     })
 }
 const unarchive = () => {
-    useLoader([service.apiService(ProjectService.removeFromArchive, [ project.value.id ], null, false)]).then((results) => {
-        if(results[0].message != 'failed') window.location = '/' + project.value.id
+    service.apiService(ProjectService.removeFromArchive, [ project.value.id ], null).then((result) => {
+        if(result.message != 'failed') window.location = '/' + project.value.id
     })
 }
 </script>

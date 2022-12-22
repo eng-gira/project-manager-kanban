@@ -34,12 +34,14 @@
     </form>
 </template>
 <script setup>
+import { useService } from '@/components/apiService'
 import ProjectService from '@/services/ProjectService'
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const service = useService()
 
 let name = ref('')
 let email = ref('')
@@ -56,13 +58,13 @@ function register() {
 
     formLoading.value = true
 
-    ProjectService.register(JSON.stringify({ name: name.value, email: email.value, password: password.value })).then((resp) => {
-        if(resp.data.message == 'failed') {
-            err.value = resp.data.data
+    service.apiService(ProjectService.register, [], { name: name.value, email: email.value, password: password.value }).then((result) => {
+        if(result.message == 'failed') {
+            err.value = result.data
         }
         else {
-            console.log(resp.data.access_token)
-            localStorage.setItem('access_token', resp.data.access_token)
+            console.log(result.data)
+            localStorage.setItem('access_token',  result.data)
 
             if(route.query.to)
             {
@@ -71,12 +73,9 @@ function register() {
             else {
                 router.push({ name: 'HomeView' })
             }
-        }
-    }).finally(() => {
-        formLoading.value = false
+        }        
     })
-
-    // localStorage.setItem('auth', 'no specific val required')
+    .finally(() => { formLoading.value = false })
 }
 
 </script>
