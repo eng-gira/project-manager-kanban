@@ -1,5 +1,5 @@
-export function useServices() {
-    const apiServices = (functionName, paramsArr = [], payloadKeyValPairs = null, consoleLogRespData = false) => {
+export function useService() {
+    const apiService = (functionName, paramsArr = [], payloadKeyValPairs = null, consoleLogRespData = true) => {
         let parameters = []
 
         if(paramsArr.length > 0) parameters.push(...paramsArr)
@@ -19,5 +19,5 @@ export function useServices() {
         })
     }
 
-    return { apiServices }
+    return { apiService }
 }

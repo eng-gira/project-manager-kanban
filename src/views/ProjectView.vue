@@ -179,8 +179,9 @@ import { computed, nextTick, onBeforeMount, onMounted, ref, watchEffect } from '
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
 import { expiryData, hasExpired, isProjectAdmin } from '@/utils';
-import { useServices } from '@/components/services.js'
+import { useService } from '@/components/apiService.js'
 import TeamModal from '@/components/TeamModal.vue'
+import { useLoader } from '@/components/loadingService';
 
 const props = defineProps({
     projectId: [String, Number]
@@ -189,13 +190,14 @@ const props = defineProps({
 let project = ref(null)
 const route = useRoute()
 const router = useRouter()
-const services = useServices()
+const service = useService()
 
 onMounted(() => {
     watchEffect(() => {
-        services.apiServices(ProjectService.getSingleProject, [ parseInt(props.projectId) ], null, false).then((result) => {
-            if(result.message != 'failed') project.value = result.data
-        })
+        useLoader( [ service.apiService(ProjectService.getSingleProject, [ parseInt(props.projectId) ], null, false) ] )
+            .then((results) => {
+                    if(results[0].message != 'failed') project.value = results[0].data
+            })
     })
     expiryData(localStorage.getItem('access_token'))
     console.log(hasExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
@@ -219,8 +221,8 @@ const refreshTask = (taskId, taskIndexInCol, colIndexInProj, e) => {
         project.value.columns[colIndexInProj].tasks.splice(taskIndexInCol, 1)
         return
     }
-    services.apiServices(ProjectService.getSingleTask, [ parseInt(taskId) ], null, false).then((result) => {
-        if(result.message != 'failed') project.value.columns[colIndexInProj].tasks[taskIndexInCol] = result.data
+    useLoader([service.apiService(ProjectService.getSingleTask, [ parseInt(taskId) ], null, false)]).then((results) => {
+        if(results[0].message != 'failed') project.value.columns[colIndexInProj].tasks[taskIndexInCol] = results[0].data
     })
 }
 const addTask = (event, columnId, columnIndex) => {
@@ -228,8 +230,8 @@ const addTask = (event, columnId, columnIndex) => {
     {
         return false
     }
-    services.apiServices(ProjectService.createTask, [ parseInt(columnId) ], { name: event.target.value }, false).then((result) => {
-        if(result.message != 'failed')  project.value.columns[columnIndex].tasks.push(result.data)
+    useLoader([ service.apiService(ProjectService.createTask, [ parseInt(columnId) ], { name: event.target.value }, false)]).then((results) => {
+        if(results[0].message != 'failed')  project.value.columns[columnIndex].tasks.push(results[0].data)
     })
     event.target.value = ''
 }
@@ -376,9 +378,10 @@ let columnName = ref('')
 const addColumn = () => {
     if(columnName.value.length < 1) return false
 
-    services.apiServices(ProjectService.createColumn, [ project.value.id ], { name: columnName.value }, false).then((result) => {
-        if(result.message != 'failed') project.value.columns.push(result.data)
-    })
+    useLoader([service.apiService(ProjectService.createColumn, [ project.value.id ], { name: columnName.value }, false)])
+        .then((results) => {
+            if(results[0].message != 'failed') project.value.columns.push(results[0].data)
+        })
 
     columnName.value = ''
 }
@@ -410,8 +413,8 @@ const deleteCol = () => {
     closeColDeletionConfirmationModal()
 
     // Send to the backend
-    services.apiServices(ProjectService.deleteColumn, [ colId ], null, false).then((result) => {
-        if(result.message == 'failed') project.value.columns.splice(colIndex, 0, deletedCol)
+    useLoader([service.apiService(ProjectService.deleteColumn, [ colId ], null, false)]).then((results) => {
+        if(results[0].message == 'failed') project.value.columns.splice(colIndex, 0, deletedCol)
     })
 }
 
@@ -438,9 +441,10 @@ const updateColName = (colId, colIndex, event) => {
     editingColOfId.value = -1
     
     // Send to the backend
-        services.apiServices(ProjectService.updateColumn, [ colId ], { name: event.target.value }, false).then((result) => {
-        if(result.message == 'failed') project.value.columns[colIndex].name = oldName
-    })
+    useLoader([service.apiService(ProjectService.updateColumn, [ colId ], { name: event.target.value }, false)])
+        .then((results) => {
+            if(results[0].message == 'failed') project.value.columns[colIndex].name = oldName
+        })
     
 }
 const disableEditingColName = (colIndex, event) => {
@@ -482,20 +486,21 @@ const updateProjectName = () => {
     }
     project.value.name = updatedProjectName.value
 
-    services.apiServices(ProjectService.updateProject, [ project.value.id ], { name: updatedProjectName.value }, false).then((result) => {
-    if(result.message == 'failed') project.value.name = oldProjectName
-    })
+    useLoader([service.apiService(ProjectService.updateProject, [ project.value.id ], { name: updatedProjectName.value }, false)])
+        .then((results) => {
+            if(results[0].message == 'failed') project.value.name = oldProjectName
+        })
     updatedProjectName.value = ''
 }
 
 const addToArchive = () => {
-    services.apiServices(ProjectService.addToArchive, [ project.value.id ], null, false).then((result) => {
-        if(result.message != 'failed') window.location = '/' + project.value.id
+    useLoader([service.apiService(ProjectService.addToArchive, [ project.value.id ], null, false)]).then((results) => {
+        if(results[0].message != 'failed') window.location = '/' + project.value.id
     })
 }
 const unarchive = () => {
-    services.apiServices(ProjectService.removeFromArchive, [ project.value.id ], null, false).then((result) => {
-        if(result.message != 'failed') window.location = '/' + project.value.id
+    useLoader([service.apiService(ProjectService.removeFromArchive, [ project.value.id ], null, false)]).then((results) => {
+        if(results[0].message != 'failed') window.location = '/' + project.value.id
     })
 }
 </script>

@@ -49,20 +49,21 @@
 import ProjectService from '@/services/ProjectService'
 import { isProjectAdmin } from '@/utils';
 import { ref } from 'vue'
-import { useServices } from './services'
+import { useService } from './apiService.js'
+import { useLoader } from './loadingService.js';
 
 const props = defineProps({
     project: Object
 })
 
-const services = useServices()
+const service = useService()
 let members = ref(props.project.members)
 
 let emailOfMemberToAdd = ref('')
 const addMember = () => {
     if(emailOfMemberToAdd.value.length > 0) {
-        services.apiServices(ProjectService.addMember, [ props.project.id ], { email: emailOfMemberToAdd.value }).then((result) => {
-            if(result.message != 'failed') members.value.push(result.data)
+        useLoader([service.apiService(ProjectService.addMember, [ props.project.id ], { email: emailOfMemberToAdd.value })]).then((results) => {
+            if(results[0].message != 'failed') members.value.push(results[0].data)
         })
         emailOfMemberToAdd.value = ''
     }
@@ -78,8 +79,8 @@ const closeTeamMemberRemovalConfirmation = () => {
     confirmingRemovalOfTeamMemberOfIndex.value = -1
 }
 const removeTeamMember = (memberEmail, memberIndex) => {
-    services.apiServices(ProjectService.removeMember, [ props.project.id ], { email: memberEmail }).then((result) => {
-        if(result.message != 'failed') members.value.splice(memberIndex, 1)[0]
+    useLoader([service.apiService(ProjectService.removeMember, [ props.project.id ], { email: memberEmail })]).then((results) => {
+        if(results[0].message != 'failed') members.value.splice(memberIndex, 1)[0]
         closeTeamMemberRemovalConfirmation()
     })
 }

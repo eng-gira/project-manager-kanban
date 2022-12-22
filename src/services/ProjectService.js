@@ -10,14 +10,14 @@ import { hasExpired } from '@/utils'
  * Used for requests to protected endpoints.
  */
 const protectedEPClient = axios.create({
-    baseURL: 'http://localhost:8000/api',
+    baseURL: 'http://127.0.0.1:8000/api',
     withCredentials: false,
 })
 /**
  * Used for refreshing the token.
  */
 const refreshClient = axios.create({
-    baseURL: 'http://localhost:8000/api/refresh',
+    baseURL: 'http://127.0.0.1:8000/api/refresh',
     withCredentials: false, 
 })
 
@@ -88,14 +88,14 @@ protectedEPClient.interceptors.response.use(function (response) {
 
 export default {
     register(data) {
-        return axios.post('http://localhost:8000/api/register', data, { 
+        return axios.post('http://127.0.0.1:8000/api/register', data, { 
             headers: {
                 'Content-Type': 'application/json'
             }
          });
     },
     login(data) {
-        return axios.post('http://localhost:8000/api/login', data, {
+        return axios.post('http://127.0.0.1:8000/api/login', data, {
             headers: {
                 'Content-Type': 'application/json'
             }
