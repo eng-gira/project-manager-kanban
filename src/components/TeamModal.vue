@@ -50,7 +50,6 @@ import ProjectService from '@/services/ProjectService'
 import { isProjectAdmin } from '@/utils';
 import { ref } from 'vue'
 import { useService } from './apiService.js'
-import { useLoader } from './loadingService.js';
 
 const props = defineProps({
     project: Object
