@@ -408,13 +408,14 @@ const deleteCol = () => {
     if(colIndex == -1 || colId == -1) return false
 
     // Update the UI
-    const deletedCol = project.value.columns.splice(colIndex, 1)[0]
+    // const deletedCol = project.value.columns.splice(colIndex, 1)[0]
 
     closeColDeletionConfirmationModal()
 
     // Send to the backend
     useLoader([service.apiService(ProjectService.deleteColumn, [ colId ], null, false)]).then((results) => {
-        if(results[0].message == 'failed') project.value.columns.splice(colIndex, 0, deletedCol)
+        if(results[0].message != 'failed') project.value.columns.splice(colIndex, 1)[0]
+        // project.value.columns.splice(colIndex, 0, deletedCol)
     })
 }
 
