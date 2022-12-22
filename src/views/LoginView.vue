@@ -15,7 +15,7 @@
             <h1 class="text-xs italic mb-3 text-red-500" v-if="err"> {{ err }}</h1>
             <button
                 class="px-2 py-1 w-[150px] text-sm rounded-lg"
-                :class="{'bg-blue-300 hover:bg-blue-500 hover:text-white': !formLoading, 'bg-gray-300 cursor-none': formLoading}"
+                :class="{'bg-[#0C4689] text-white': !formLoading, 'bg-gray-300 cursor-none': formLoading}"
                 :disabled="formLoading"
                 >
                 {{ formLoading ? 'Loading...' : 'Login' }}

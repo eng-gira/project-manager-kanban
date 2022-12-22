@@ -28,7 +28,7 @@
                 <!-- Assignee -->
                 <div class="flex justify-start mt-6 text-sm lg:text-lg items-center" v-if="members && members.length > 0">
                     <h1 class="mr-6" :class="{'lg:block hidden': confirmingNewUserAssignment}">Assignee:</h1>
-                    <select class="border border-black py-1" v-model="assigneeId" @change="askToConfirmNewUserAssignment">
+                    <select class="border border-black lg:text-md text-xs" v-model="assigneeId" @change="askToConfirmNewUserAssignment">
                         <option v-for="member in members" :key="member.user_id" :value="member.user_id" :selected="member.user_id==assigneeId">
                             {{ member.user_email }}
                         </option>
@@ -68,7 +68,7 @@
                             v-model="commentBody"/>
                         <div class="flex justify-end space-x-2">
                             <button
-                                class="p-1 text-xs lg:text-sm rounded-lg bg-blue-300 hover:bg-blue-500 hover:text-white"
+                                class="p-1 text-xs lg:text-sm rounded-lg bg-[#0C4689] text-white"
                                 @click="addComment"
                                 >
                                 Submit
@@ -99,7 +99,7 @@
                                     Edit
                                 </button>
                                 <div v-else>
-                                    <button class="text-xs bg-blue-300 hover:bg-blue-500 px-2 py-1 rounded-lg mr-3" @click="updateComment(comment.id, commentIndex)">Save</button>
+                                    <button class="text-xs bg-[#0C4689] px-2 py-1 rounded-lg mr-3" @click="updateComment(comment.id, commentIndex)">Save</button>
                                     <button class="text-xs bg-gray-300 hover:bg-gray-500 px-2 py-1 rounded-lg" @click="stopEditingComment">Cancel</button>
                                 </div>
 

@@ -178,7 +178,6 @@
 import { computed, nextTick, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
-import jwt_decode from "jwt-decode";
 import { expiryData, hasExpired, isProjectAdmin } from '@/utils';
 import { useServices } from '@/components/services.js'
 import TeamModal from '@/components/TeamModal.vue'

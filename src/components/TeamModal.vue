@@ -37,7 +37,7 @@
                     v-model="emailOfMemberToAdd"
                     />
                 <button
-                    class="rounded-lg px-2 py-1 text-xs bg-blue-300 hover:bg-blue-500 hover:text-white"
+                    class="rounded-lg px-2 py-1 text-xs bg-[#0C4689] text-white"
                     >
                     Add
                 </button>

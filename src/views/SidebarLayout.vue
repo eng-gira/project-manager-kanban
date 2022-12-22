@@ -80,28 +80,23 @@ import ProjectService from '@/services/ProjectService'
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMedia } from '@/components/media.js'
+import { useServices } from '@/components/services.js'
 
 let archivedProjects = ref(null)
 const route = useRoute()
 const router = useRouter()
 let projects = ref(null)
 const isSmall = useMedia('(max-width: 768px)')
+const services = useServices()
 
 onMounted(() => {
-    ProjectService.getProjects().then((resp) => {
-        projects.value = resp.data.data
-        console.log(projects.value)
-    }).catch(() => {
-        console.log('failed to get all projects')
+    services.apiServices(ProjectService.getProjects).then((result) => { 
+        if(result.message != 'failed') projects.value = result.data 
     })
-
-    ProjectService.getArchivedProjects().then((resp) => {
-        if(resp.data.message != 'failed')
-            archivedProjects.value = resp.data.data
+    services.apiServices(ProjectService.getArchivedProjects).then((result) => { 
+        if(result.message != 'failed') archivedProjects.value = result.data 
     })
 })
-
-
 let selectedProjectId = computed(() => {
     if(!projects.value) return -1
 
