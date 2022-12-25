@@ -11,7 +11,7 @@ export function hasExpired(token) {
   const decoded = jwt_decode(token)
   const now = Date.now() / 1000
 
-  if(! decoded || now >= decoded.exp) {
+  if(! decoded || ((now + 2) >= decoded.exp)) {
     return true
   }
   return false
