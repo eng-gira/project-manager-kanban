@@ -1,6 +1,19 @@
 # project-manager-kanban
 
-## Project setup
+## Description
+- A kanban-board based project-management tool.
+- Responsive UI.
+- Tasks and columns can be dragged.
+- Role-based users.
+- JWT authentication.
+
+### Technologies
+- Vue 3
+- Vue Router
+- Composition API
+- Tailwind CSS
+
+### Project setup
 ```
 npm install
 ```
@@ -14,11 +27,3 @@ npm run serve
 ```
 npm run build
 ```
-
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
