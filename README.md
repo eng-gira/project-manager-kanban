@@ -6,6 +6,7 @@
 - Tasks and columns can be dragged.
 - Role-based users.
 - JWT authentication.
+- Connection to backend (RESTful API).
 
 ### Technologies
 - Vue 3
