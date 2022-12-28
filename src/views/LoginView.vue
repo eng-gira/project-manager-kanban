@@ -23,7 +23,7 @@
         </div>
         
         <h1 class="">
-            Do not have an account? <router-link class="underline" :to="{name: 'RegisterView', query: { to: this.$route.query.to ?? null }}">Register</router-link> instead.
+            Do not have an account? <router-link class="underline" :to="{name: 'RegisterView', query: { to: route.query.to ?? null }}">Register</router-link> instead.
         </h1>
     </form>
 </template>

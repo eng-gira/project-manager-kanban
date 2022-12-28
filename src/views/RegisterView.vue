@@ -29,7 +29,7 @@
         </div>
         
         <h1 class="">
-            Already have an account? <router-link class="underline" :to="{name: 'LoginView', query: { to: this.$route.query.to ?? null }}">Login</router-link> instead.
+            Already have an account? <router-link class="underline" :to="{name: 'LoginView', query: { to: route.query.to ?? null }}">Login</router-link> instead.
         </h1>
     </form>
 </template>
