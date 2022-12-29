@@ -178,7 +178,7 @@
 import { computed, nextTick, onBeforeMount, onMounted, ref, watchEffect } from 'vue'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import ProjectService from '@/services/ProjectService';
-import { expiryData, hasExpired, isProjectAdmin } from '@/utils';
+import { expiryData, nearlyExpired, isProjectAdmin } from '@/utils';
 import { useService } from '@/components/apiService.js'
 import TeamModal from '@/components/TeamModal.vue'
 
@@ -199,7 +199,7 @@ onMounted(() => {
             })
     })
     expiryData(localStorage.getItem('access_token'))
-    console.log(hasExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
+    console.log(nearlyExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
 })
 let isTaskOpen = computed(() => {
     return route.name === 'TaskModal'

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import router from '@/router'
-import { hasExpired } from '@/utils'
+import { nearlyExpired } from '@/utils'
 
 // const apiClient = axios.create({
 //     baseURL: 'http://localhost:8000/api',
@@ -27,7 +27,7 @@ protectedEPClient.interceptors.request.use(async function (config) {
     // console.log('req. interceptor - config.headers.Authorization:', config.headers.Authorization)
 
     // Do something before request is sent
-    if(hasExpired(localStorage.getItem('access_token')))
+    if(nearlyExpired(localStorage.getItem('access_token')))
     {
         console.log('access_token HAS expired')
 

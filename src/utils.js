@@ -7,11 +7,11 @@ export function isProjectAdmin (adminId) {
   return decoded.user.id == adminId
 }
 
-export function hasExpired(token) {
+export function nearlyExpired(token) {
   const decoded = jwt_decode(token)
   const now = Date.now() / 1000
 
-  if(! decoded || ((now + 2) >= decoded.exp)) {
+  if(! decoded || ((now + 30) >= decoded.exp)) {
     return true
   }
   return false
