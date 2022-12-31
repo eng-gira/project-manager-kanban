@@ -22,6 +22,23 @@
                     placeholder="Description..."
                     @change="updateDescription($event)"
                 />
+                
+                <h1 
+                    v-if="!confirmingTaskDel && !deletingTask" 
+                    class="mt-3 text-[10px] lg:text-sm mb-3 font-bold text-red-500 cursor-pointer"
+                    @click="startConfirmingTaskDel">
+                    Delete Task
+                </h1>
+                <div v-if="confirmingTaskDel && !deletingTask" class="flex space-x-3 items-center mt-3">
+                    <h1 class="text-[10px] lg:text-sm mb-3 font-bold text-red-500 cursor-pointer" @click="deleteTask">Confirm</h1>
+                    <h1 class="text-[10px] lg:text-sm mb-3 font-bold text-gray-500 cursor-pointer" @click="stopConfirmingTaskDel">Cancel</h1>
+                </div>
+                <h1 
+                    v-if="deletingTask" 
+                    class="mt-3 text-[10px] lg:text-sm mb-3 italic"
+                    >
+                    Loading...
+                </h1>
 
 
                 <!-- Assignee -->
@@ -60,7 +77,6 @@
                 <div class="flex flex-col mt-6 w-full">
                     <div class="flex justify-between items-center">
                         <h1 class="text-sm lg:text-lg mb-3 font-bold">Comments:</h1>
-                        <h1 class="text-[10px] lg:text-sm mb-3 font-bold text-red-500 cursor-pointer" @click="deleteTask">Delete Task</h1>
                     </div>
                     <!-- Add a Comment -->
                     <div class="flex flex-col bg-slate-100 space-y-2 rounded-lg p-2">
@@ -200,15 +216,23 @@ const updateDescription = (event) => {
     }
 }
 let deletingTask = ref(false)
+let confirmingTaskDel = ref(false)
+const startConfirmingTaskDel = () => {
+    confirmingTaskDel.value = true
+}
+const stopConfirmingTaskDel = () => {
+    confirmingTaskDel.value = false
+}
 const deleteTask = () => {
     waitingForBE.value= true
     deletingTask.value = true
-
+    
     service.apiService(ProjectService.deleteTask, [task.value.id]).then((result) => {
-            waitingForBE.value = false; deletingTask.value = false
-            if(result.message != 'failed') emitCloseTask('deleted')
-        })
-        .catch(() => { waitingForBE.value = false; deletingTask.value = false })
+        waitingForBE.value = false; deletingTask.value = false
+        if(result.message != 'failed') emitCloseTask('deleted')
+    })
+    .catch(() => { waitingForBE.value = false; deletingTask.value = false })
+    .finally(() => { stopConfirmingTaskDel() })
 }
 
 const emitCloseTask = (e = null) => {
