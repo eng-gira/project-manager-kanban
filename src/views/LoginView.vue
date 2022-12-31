@@ -53,8 +53,6 @@ function login() {
             err.value = result.message
         }
         else {
-            console.log('result.data', result.data)
-            console.log(result.data)
             localStorage.setItem('access_token', result.data)
 
             if(route.query.to) {

@@ -129,7 +129,7 @@
                     <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[200px] lg:min-w-[300px] h-[30px] lg:h-[45px] flex lg:text-md text-sm">
                         <input
                             type="text"
-                            class="p-2 mr-2 bg-transparent"
+                            class="p-2 bg-transparent max-w-full w-full"
                             placeholder="Add a Column..."
                             v-model="columnName"
                             @keyup.enter="addColumn"
@@ -199,7 +199,7 @@ onMounted(() => {
             })
     })
     expiryData(localStorage.getItem('access_token'))
-    console.log(nearlyExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
+    // console.log(nearlyExpired(localStorage.getItem('access_token')) ? 'access exp' : 'access not exp')
 })
 let isTaskOpen = computed(() => {
     return route.name === 'TaskModal'
@@ -265,17 +265,14 @@ const placeTask = (toColOfId, toColIndex, toTaskIndex, event) => {
                 const reMovedTask = project.value.columns[toColIndex].tasks.splice(toTaskIndex, 1)[0]
                 project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
 
-                console.log('failed', resp.data.data)
             }
             else {
-                console.log(resp.data.data)
             }
         }).catch(() => {
                 // replace the task as it was before
                 const reMovedTask = project.value.columns[toColIndex].tasks.splice(toTaskIndex, 1)[0]
                 project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
 
-                console.log('caught', resp.data.data)            
         })
     }
     else {
@@ -290,16 +287,13 @@ const placeTask = (toColOfId, toColIndex, toTaskIndex, event) => {
                 const reMovedTask = project.value.columns[toColIndex].tasks.pop()
                 project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
 
-                console.log('failed', resp.data.data)
             }
             else {
-                console.log(resp.data.data)
             }
         }).catch(() => {
             const reMovedTask = project.value.columns[toColIndex].tasks.pop()
                 project.value.columns[fromColIndex].tasks.splice(fromTaskIndex, 0, reMovedTask)
 
-                console.log('caught', resp.data.data)            
         })
     }
 }
@@ -336,16 +330,13 @@ const placeColumn = (toColOfId, toColIndex, event) => {
             const reMovedCol = project.value.columns.splice(toColIndex, 1)[0]
             project.value.columns.splice(fromColIndex, 0, reMovedCol)
 
-            console.log('failed:', resp.data.data)
         }
         else {
-            console.log(resp.data.data)
         }
     }).catch((resp) => {
         const reMovedCol = project.value.columns.splice(toColIndex, 1)[0]
         project.value.columns.splice(fromColIndex, 0, reMovedCol)
 
-        console.log('failed:', resp.data)
     });
 
     // This section is to determine the columns that were forced to move, and the positions where they were moved.
@@ -354,7 +345,7 @@ const placeColumn = (toColOfId, toColIndex, event) => {
         for(const col of project.value.columns) {
             if(col.id == toColOfId)
             {
-                console.log('col of id', col.id, 'and name', col.name, 'is now at position', indexCounter)
+                // console.log('col of id', col.id, 'and name', col.name, 'is now at position', indexCounter)
                 
                 // Since it is just one position movement, only the two cols were affected. (Proof required)
                 break
@@ -366,7 +357,7 @@ const placeColumn = (toColOfId, toColIndex, event) => {
         // Get the new positions of all cols
         let indexCounter = 0
         for(const col of project.value.columns) {
-            console.log('col of id', col.id, ' (name: ', col.name , ') now has the position', indexCounter)
+            // console.log('col of id', col.id, ' (name: ', col.name , ') now has the position', indexCounter)
             indexCounter++
         }        
     }

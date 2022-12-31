@@ -60,7 +60,6 @@ function register() {
             err.value = result.data
         }
         else {
-            console.log(result.data)
             localStorage.setItem('access_token',  result.data)
 
             if(route.query.to)

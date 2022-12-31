@@ -48,7 +48,7 @@ protectedEPClient.interceptors.request.use(async function (config) {
                 return config
             } else 
             {
-                console.log('no access token refreshed, must login also, resp:', resp)
+                // console.log('no access token refreshed, must login also, resp:', resp)
                 localStorage.removeItem('access_token')
                 
                 window.location = (process.env.NODE_ENV === 'production' ? '/project-manager/' : '/') + 'auth/login'
@@ -56,7 +56,7 @@ protectedEPClient.interceptors.request.use(async function (config) {
             }
         }
         catch(e) {
-            console.log('error at refreshing...')
+            // console.log('error at refreshing...')
             localStorage.removeItem('access_token')
 
             window.location = (process.env.NODE_ENV === 'production' ? '/project-manager/' : '/') + 'auth/login'
@@ -77,15 +77,15 @@ protectedEPClient.interceptors.response.use(function (response) {
     return response;
   }, function (error) {
     // Do something with response error
-    console.log('error:', error)
-    console.log('error.response:', error.response)
-    console.log('error.response.status:', error.response.status)
-    console.log('error.response.message:', error.response.message)
-    console.log('error.response.data.message:', error.response.data.message)
-    console.log('error.response.config.baseURL + / + error.response.config.url:', error.response.config.baseURL + '/' + error.response.config.url)
+    // console.log('error:', error)
+    // console.log('error.response:', error.response)
+    // console.log('error.response.status:', error.response.status)
+    // console.log('error.response.message:', error.response.message)
+    // console.log('error.response.data.message:', error.response.data.message)
+    // console.log('error.response.config.baseURL + / + error.response.config.url:', error.response.config.baseURL + '/' + error.response.config.url)
 
     if(localStorage.getItem('access_token') && error.response.data.message == 'Unauthenticated.') {
-        console.log('lagged refresh... pushing to', router.currentRoute.value.fullPath)
+        // console.log('lagged refresh... pushing to', router.currentRoute.value.fullPath)
         router.push(router.currentRoute.value.fullPath)
     } else {
         router.push({name: 'ErrorDisplayView', params: { status: error.response.status }})

@@ -1,7 +1,7 @@
 <template>
-    <div class="flex">
+    <div class="flex min-w-[60px]">
         <!-- Sidebar -->
-        <v-icon name="co-hamburger-menu" class="w-[25px]" v-if="isSmall" @click="showSidebar"/>
+        <v-icon name="co-hamburger-menu" class="mt-1 w-[25px]" v-if="isSmall" @click="showSidebar"/>
         <transition name="fade">
             <div v-if="(showSidebarAtSmall && isSmall) || !isSmall" :class="{'absolute inset-0': isSmall}" 
                 class="delay-100 flex flex-col self-start h-screen overflow-y-auto w-[240px] lg:w-[360px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
@@ -72,7 +72,7 @@
 
         </transition>
         <!-- Router View -->
-        <router-view />
+        <router-view @click="hideSidebar"/>
     </div>
 </template>
 <script setup>
@@ -92,11 +92,9 @@ const service = useService()
 onMounted(() => {
     service.apiService(ProjectService.getProjects).then((result) => {
         if(result.message != 'failed') projects.value = result.data 
-        console.log('fin. projs')
     })
     service.apiService(ProjectService.getArchivedProjects).then((result) => {
         if(result.message != 'failed') archivedProjects.value = result.data 
-        console.log('fin. archive')
     })
     
 })
@@ -166,7 +164,6 @@ const createProject = (event) => {
 
 let showSidebarAtSmall = ref(false)
 const showSidebar = () => {
-    console.log('show sidebar')
     showSidebarAtSmall.value = true
 }
 const hideSidebar = () => {

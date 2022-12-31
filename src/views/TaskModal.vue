@@ -11,10 +11,8 @@
                     />
                     <v-icon
                         name="io-remove-circle-sharp"
-                        class="cursor-pointer lg:w-[20px] w-[15px]"
-                        @click="openColDeletionConfirmationModal(column.id, columnIndex)"
+                        class="cursor-pointer lg:w-[20px] w-[15px] text-red-500"
                         @mousedown="deleteTask"
-                        :disabled="isModalOpen"
                         />
                 </div>
 
@@ -27,7 +25,7 @@
 
 
                 <!-- Assignee -->
-                <div class="flex justify-start mt-6 lg:text-lg items-center" v-if="members && members.length > 0">
+                <div class="flex justify-start mt-6 text-sm lg:text-lg items-center" v-if="members && members.length > 0">
                     <h1 class="mr-6" :class="{'lg:block hidden': confirmingNewUserAssignment}">Assignee:</h1>
                     <select class="border border-black text-sm" v-model="assigneeId" @change="askToConfirmNewUserAssignment">
                         <option v-for="member in members" :key="member.user_id" :value="member.user_id" :selected="member.user_id==assigneeId">
@@ -143,7 +141,6 @@ const service = useService()
 onMounted(() => {
     service.apiService(ProjectService.getSingleTask, [props.id]).then((result) => {
         if(result.message != 'failed') {
-            console.log('fetched task')
             task.value = result.data
             assigneeId.value = task.value.assignee_id
         }
@@ -151,7 +148,6 @@ onMounted(() => {
 
     service.apiService(ProjectService.getMembers, [route.params.projectId], null).then((result) => {
         if(result.message != 'failed') {
-            console.log('fetched members')
             members.value = result.data
             for(let i = 0; i < members.value.length; i++) {
                 memberIdNameMapper.value[members.value[i].user_id] = members.value[i].user_data.name

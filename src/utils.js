@@ -20,7 +20,4 @@ export function nearlyExpired(token) {
 export function expiryData(token) {
   const decoded = jwt_decode(token)
   const now = Date.now() / 1000
-
-  console.log('now:', now)
-  console.log('decoded.exp:', decoded.exp)
 }
