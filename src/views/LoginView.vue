@@ -1,5 +1,5 @@
 <template>
-    <form class="flex flex-col w-[600px] border border-gray-500 rounded-md my-6 p-4" @submit.prevent="login">
+    <form class="flex flex-col w-[300px] lg:w-[400px] border border-gray-500 rounded-md my-6 p-4" @submit.prevent="login">
         <h1 class="self-start text-lg font-bold mb-3">Login</h1>
         <div class="flex flex-col space-y-2 mb-3">
             <label class="self-start uppercase lg:text-xs text-[10px] text-gray-500 font-bold" for="email">Email</label>
