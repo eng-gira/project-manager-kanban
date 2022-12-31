@@ -51,7 +51,7 @@ protectedEPClient.interceptors.request.use(async function (config) {
                 console.log('no access token refreshed, must login also, resp:', resp)
                 localStorage.removeItem('access_token')
                 
-                window.location = '/auth/login'
+                window.location = (process.env.NODE_ENV === 'production' ? '/project-manager/' : '/') + 'auth/login'
                 return Promise.reject();
             }
         }
@@ -59,7 +59,7 @@ protectedEPClient.interceptors.request.use(async function (config) {
             console.log('error at refreshing...')
             localStorage.removeItem('access_token')
 
-            window.location = '/auth/login'
+            window.location = (process.env.NODE_ENV === 'production' ? '/project-manager/' : '/') + 'auth/login'
 
             return Promise.reject()
         }
