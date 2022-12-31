@@ -10,9 +10,9 @@
                         @change="updateName($event)"
                     />
                     <v-icon
-                        name="io-remove-circle-sharp"
-                        class="cursor-pointer lg:w-[20px] w-[15px] text-red-500"
-                        @mousedown="deleteTask"
+                        name="io-close-outline"
+                        class="cursor-pointer lg:w-[25px] w-[20px]"
+                        @click="emitCloseTask"
                         />
                 </div>
 
@@ -58,7 +58,10 @@
 
                 <!-- Comments -->
                 <div class="flex flex-col mt-6 w-full">
-                    <h1 class="text-sm lg:text-lg mb-3 font-bold">Comments:</h1>
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-sm lg:text-lg mb-3 font-bold">Comments:</h1>
+                        <h1 class="text-[10px] lg:text-sm mb-3 font-bold text-red-500 cursor-pointer" @click="deleteTask">Delete Task</h1>
+                    </div>
                     <!-- Add a Comment -->
                     <div class="flex flex-col bg-slate-100 space-y-2 rounded-lg p-2">
                         <textarea
