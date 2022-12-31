@@ -116,7 +116,7 @@
         
                             <input
                                 type="text"
-                                class="p-2 block bg-transparent h-[28px] lg:text-md text-sm"
+                                class="p-2 block w-full bg-transparent h-[28px] lg:text-md text-sm"
                                 placeholder="Add a task..."
                                 @keyup.enter="addTask($event, column.id, columnIndex)"
                                 @keyup.esc="$event.target.value = ''"
@@ -129,7 +129,7 @@
                     <div class="p-2 mr-4 text-left shadow rounded bg-gray-300 min-w-[200px] lg:min-w-[300px] h-[30px] lg:h-[45px] flex lg:text-md text-sm">
                         <input
                             type="text"
-                            class="p-2 mr-2 flex-grow bg-transparent"
+                            class="p-2 mr-2 bg-transparent"
                             placeholder="Add a Column..."
                             v-model="columnName"
                             @keyup.enter="addColumn"
