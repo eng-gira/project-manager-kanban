@@ -96,18 +96,24 @@ protectedEPClient.interceptors.response.use(function (response) {
 
 export default {
     register(data) {
-        return axios.post('https://pm-kanban-back.onrender.com/api/register', data, { 
-            headers: {
-                'Content-Type': 'application/json'
+        return axios.post((process.env.NODE_ENV === 'production' ? process.env.VUE_APP_API_URL_PROD : process.env.VUE_APP_API_URL)+ '/register' ,
+            data, 
+            { 
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-         });
+        );
     },
     login(data) {
-        return axios.post('https://pm-kanban-back.onrender.com/api/login', data, {
-            headers: {
-                'Content-Type': 'application/json'
+        return axios.post((process.env.NODE_ENV === 'production' ? process.env.VUE_APP_API_URL_PROD : process.env.VUE_APP_API_URL)+ '/login' ,
+            data, 
+            { 
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        });
+        );
     },
     getProjects() {
         return protectedEPClient.get('projects', {
