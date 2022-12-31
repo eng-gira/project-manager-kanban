@@ -1,20 +1,17 @@
 <template>
     <form class="flex flex-col w-[600px] border border-gray-500 rounded-md my-6 p-4" @submit.prevent="register">
         <h1 class="self-start text-lg font-bold mb-3">Register</h1>
-        <div class="mb-3 flex flex-col w-[400px] self-center">
-            <label class="font-bold self-start" for="name">Name</label>
-            <input v-model="name" type="text" id="name" placeholder="Name" class="p-2 text-sm border border-black rounded-md flex-grow bg-transparent"/>
-            <!-- <h1 class="text-sm italic mt-3"></h1> -->
+        <div class="flex flex-col space-y-2 mb-3">
+            <label class="self-start uppercase lg:text-xs text-[10px] text-gray-500 font-bold" for="name">Name</label>
+            <input id="name" type="text" class="rounded-lg p-2 text-sm lg:text-base font-bold border border-black" v-model="name" />
         </div>
-        <div class="mb-3 flex flex-col w-[400px] self-center">
-            <label class="font-bold self-start" for="email">Email</label>
-            <input v-model="email" type="email" id="email" placeholder="Email" class="p-2 text-sm border border-black rounded-md flex-grow bg-transparent"/>
-            <!-- <h1 class="text-sm italic mt-3"></h1> -->
+        <div class="flex flex-col space-y-2 mb-3">
+            <label class="self-start uppercase lg:text-xs text-[10px] text-gray-500 font-bold" for="email">Email</label>
+            <input id="email" type="email" class="rounded-lg p-2 text-sm lg:text-base font-bold border border-black" v-model="email" />
         </div>
-        <div class="mb-3 flex flex-col w-[400px] self-center">
-            <label class="font-bold self-start" for="password">Password</label>
-            <input v-model="password" type="password" id="password" placeholder="Password" class="p-2 text-sm border border-black rounded-md flex-grow bg-transparent"/>
-            <!-- <h1 class="text-sm italic mt-3"></h1> -->
+        <div class="flex flex-col space-y-2 mb-3">
+            <label class="self-start uppercase lg:text-xs text-[10px] text-gray-500 font-bold" for="password">Password</label>
+            <input id="password" type="password" class="rounded-lg p-2 text-sm lg:text-base font-bold border border-black" v-model="password"/>
         </div>
         
         <div class="mb-3 flex flex-col self-center items-center">
