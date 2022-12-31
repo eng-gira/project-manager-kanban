@@ -116,7 +116,7 @@
         
                             <input
                                 type="text"
-                                class="p-2 block w-full bg-transparent h-[28px] lg:text-md text-sm"
+                                class="p-2 block bg-transparent h-[28px] lg:text-md text-sm"
                                 placeholder="Add a task..."
                                 @keyup.enter="addTask($event, column.id, columnIndex)"
                                 @keyup.esc="$event.target.value = ''"

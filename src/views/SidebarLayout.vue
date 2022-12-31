@@ -1,7 +1,7 @@
 <template>
     <div class="flex">
         <!-- Sidebar -->
-        <v-icon name="co-hamburger-menu" v-if="isSmall" @click="showSidebar"/>
+        <v-icon name="co-hamburger-menu" class="w-[25px]" v-if="isSmall" @click="showSidebar"/>
         <transition name="fade">
             <div v-if="(showSidebarAtSmall && isSmall) || !isSmall" :class="{'absolute inset-0': isSmall}" 
                 class="delay-100 flex flex-col self-start h-screen overflow-y-auto w-[240px] lg:w-[360px] bg-[#FFFFFF] border-r-[1px] border-r-[#CCCCCC]">
