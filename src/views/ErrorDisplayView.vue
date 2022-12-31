@@ -3,12 +3,11 @@
       <h1 v-if="errorType == '4xx'" class="text-2xl font-bold text-red-500">{{ route.params.status + ': ' + 'Unauthorized' }}</h1>
       <div v-if="errorType == '404'">
         <h1 class="text-2xl font-bold">{{ route.params.status + ': ' + 'Not Found'}}</h1>
-        <h1 class="">Go to <router-link to="/" class="font-bold hover:underline">Home</router-link> Page?</h1>
       </div>
       <div v-if="errorType == '5xx'">
         <h1 class="text-2xl font-bold">A Problem has occurred.</h1>
-        <h1 class="">Go to <router-link to="/" class="font-bold hover:underline">Home</router-link> Page?</h1>
       </div>
+      <h1 class="">Go to <router-link to="/" class="font-bold hover:underline">Home</router-link> Page?</h1>
     </div>
  </template>
 <script setup>
