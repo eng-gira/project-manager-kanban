@@ -486,12 +486,12 @@ const updateProjectName = () => {
 
 const addToArchive = () => {
     service.apiService(ProjectService.addToArchive, [ project.value.id ], null).then((result) => {
-        if(result.message != 'failed') window.location = '/' + project.value.id
+        if(result.message != 'failed') window.location = (process.env.NODE_ENV === 'production' ? '/project-manager/' : '/') + project.value.id
     })
 }
 const unarchive = () => {
     service.apiService(ProjectService.removeFromArchive, [ project.value.id ], null).then((result) => {
-        if(result.message != 'failed') window.location = '/' + project.value.id
+        if(result.message != 'failed') window.location = (process.env.NODE_ENV === 'production' ? '/project-manager/' : '/') + project.value.id
     })
 }
 </script>
