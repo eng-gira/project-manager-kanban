@@ -9,17 +9,18 @@
                         :value="task.name"
                         @change="updateName($event)"
                     />
-                    <button
-                        class="bg-red-300 hover:bg-red-500 hover:text-white py-0 px-1 text-xs rounded-full"
+                    <v-icon
+                        name="io-remove-circle-sharp"
+                        class="cursor-pointer lg:w-[20px] w-[15px]"
+                        @click="openColDeletionConfirmationModal(column.id, columnIndex)"
                         @mousedown="deleteTask"
-                        :class="{'italic': deletingTask}">
-                        {{ deletingTask ? 'Loading...' : 'Delete'}} 
-                    </button>
+                        :disabled="isModalOpen"
+                        />
                 </div>
 
                 <textarea
                     class="mt-5 w-full text-xs lg:text-sm p-1 border border-gray-500 min-h-[100px] resize-none rounded-lg"
-                    :value=task.description
+                    :value="task.description"
                     placeholder="Description..."
                     @change="updateDescription($event)"
                 />
