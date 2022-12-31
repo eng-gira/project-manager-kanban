@@ -83,7 +83,8 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+  base: process.env.NODE_ENV === 'production' ? '/project-manager/' : '/'
 })
 
 router.beforeEach((to) => {

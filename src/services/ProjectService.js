@@ -10,6 +10,7 @@ import { nearlyExpired } from '@/utils'
  * Used for requests to protected endpoints.
  */
 const protectedEPClient = axios.create({
+    baseURL: process.env.NODE_ENV === 'production' ? process.env.VUE_APP_API_URL_PROD : process.env.VUE_APP_API_URL,
     baseURL: 'https://pm-kanban-back.onrender.com/api',
     withCredentials: false,
 })
@@ -17,6 +18,7 @@ const protectedEPClient = axios.create({
  * Used for refreshing the token.
  */
 const refreshClient = axios.create({
+    baseURL: process.env.NODE_ENV === 'production' ? process.env.VUE_APP_REFRESH_URL_PROD : process.env.VUE_APP_REFRESH_URL,
     baseURL: 'https://pm-kanban-back.onrender.com/api/refresh',
     withCredentials: false, 
 })
