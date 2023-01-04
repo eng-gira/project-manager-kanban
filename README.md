@@ -28,3 +28,6 @@ npm run serve
 ```
 npm run build
 ```
+
+### Link
+Click [here](http://206.189.196.40/project-manager) to visit it.
